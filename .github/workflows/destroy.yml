@@ -23,20 +23,22 @@ env:
   AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
 
 jobs:
-  ecr:
+  task:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Destroy ecrs
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_image_uri: this
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task
           tg_action: destroy
 
-  task:
-    needs: ecr
+  ecr:
+    needs: task
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
