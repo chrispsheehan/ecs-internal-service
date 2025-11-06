@@ -36,7 +36,7 @@ jobs:
         id: terragrunt_action
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-          tg_directory: terragrunt/${{ env.environment }}/aws/ecr
+          tg_directory: infra/live/${{ env.environment }}/aws/ecr
 
       - name: Get ECR
         id: get_ecr
