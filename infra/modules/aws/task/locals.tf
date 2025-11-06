@@ -8,7 +8,7 @@ locals {
     container_port      = var.container_port
     cpu                 = var.cpu
     memory              = var.memory
-    aws_region          = var.region
+    aws_region          = var.aws_region
     cloudwatch_log_name = local.cloudwatch_log_name
   })
 }
