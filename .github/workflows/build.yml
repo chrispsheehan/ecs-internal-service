@@ -1,0 +1,72 @@
+name: Build Images
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      aws_account_id:
+        required: true
+        type: string
+    outputs:
+      backend_image_uri:
+        value: ${{ jobs.backend.outputs.image_uri }}
+
+env:
+  AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ inputs.aws_account_id }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
+  environment: ${{inputs.environment}}
+  version: ${{ inputs.version }}
+
+jobs:
+  ecr:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      ecr_repo_name: ${{ steps.get_ecr.outputs.ecr_repo_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: terragrunt_action
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: terragrunt/${{ env.environment }}/ecr
+
+      - name: Get ECR
+        id: get_ecr
+        env:
+          TG_OUTPUTS: ${{ steps.terragrunt_action.outputs.tg_outputs  }}
+        run: |
+          echo "ecr_repo_name=$(echo $TG_OUTPUTS | jq -r '.ecr_repo_name.value')" >> $GITHUB_OUTPUT
+
+  backend:
+    needs: ecr
+    runs-on: ubuntu-latest
+    outputs:
+      image_uri: ${{ steps.set_uri.outputs.IMAGE_URI }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and push image
+        id: build-image
+        uses: ./.github/actions/build_image
+        with:
+          aws_account_id: ${{ env.AWS_ACCOUNT_ID }}
+          aws_region: ${{ env.AWS_REGION }}
+          ecr_repository_name: ${{ needs.ecr.outputs.ecr_repo_name }}
+          version: ${{ env.version }}
+          push-role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN }}
+
+      - id: set_uri
+        run: |
+          echo "IMAGE_URI=${{ env.IMAGE_URI }}" >> $GITHUB_OUTPUT

@@ -1,0 +1,95 @@
+name: Build and push image to ECR
+description: Pushes an image to ECR.
+
+inputs:
+  aws_account_id:
+    description: 'ECR aws account id'
+    required: true
+  aws_region:
+    description: 'ECR aws region'
+    required: true
+  ecr_repository_name:
+    description: 'ECR repo name'
+    required: true
+  version:
+    description: 'Version to tag and push'
+    required: true
+  target:
+    description: 'Docker / Container definition target to build'
+    required: false
+  push-role-to-assume:
+    description: 'Role used to push to ECR'
+    required: true
+  codeartifact_aws_account_id:
+    description: 'CodeArtifact aws account id'
+    required: true
+    default: '883121098928'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set tag string
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.target }}" ]; then
+          echo "TAG=${{ inputs.target }}-${{ inputs.version }}" >> $GITHUB_ENV
+        else
+          echo "TAG=${{ inputs.version }}" >> $GITHUB_ENV
+        fi
+
+    - name: build
+      shell: bash
+      env:
+        DOCKER_BUILDKIT: 1
+      run: |
+        if [ -n "${{ inputs.target }}" ]; then
+          echo "Building with target '${{ inputs.target }}'"
+          docker build --target ${{ inputs.target }} -t $TAG .
+        else
+          echo "Building without target"
+          docker build -t $TAG .
+        fi
+        echo "Image Built for version $TAG"
+
+    - name: Tag Docker Image
+      shell: bash
+      run: |
+        docker tag $TAG ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:$TAG
+
+    - name: Configure AWS credentials for pushing image
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.push-role-to-assume }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Push Docker Image to ECR
+      shell: bash
+      run: |
+        aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+        docker push ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:$TAG
+        IMAGE_URI="${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:$TAG"
+        echo "NEWLY BUILT Image URI is $IMAGE_URI"
+        echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+        echo Image:$IMAGE_URI
+
+    - name: Get Latest ECR Image Tag
+      shell: bash
+      run: |
+        sleep 5
+        VERSION_TAG=$(aws ecr describe-images --repository-name ${{ inputs.ecr_repository_name }} \
+                            --region ${{ inputs.aws_region }} \
+                            --query "imageDetails[?imageTags && contains(imageTags, '$TAG')].imageTags[0]" \
+                            --output text)
+        if [ "$VERSION_TAG" == "None" ]; then
+          echo "ERROR: No matching image tag found for version $TAG"
+          exit 1
+        fi
+        IMAGE_URI="${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:$VERSION_TAG"
+        echo "EXISTING Image URI is $IMAGE_URI"
+        echo "IMAGE_TAG=$VERSION_TAG" >> $GITHUB_ENV
+        echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV

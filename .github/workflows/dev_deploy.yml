@@ -1,0 +1,24 @@
+name: Dev Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      version: ${{ github.sha }}
+      environment: dev
+      aws_account_id: 619090116609
+
+  dev:
+    uses: ./.github/workflows/deploy.yml
+    needs: build
+    with:
+      environment: dev
+      infra_version: ${{ github.sha }}
+      backend_image_uri: ${{ needs.build.outputs.backend_image_uri }}

@@ -2,7 +2,12 @@ locals {
   aws_region = "eu-west-2"
   allowed_role_actions = [
     "s3:*",
-    "iam:*"
+    "iam:*",
+    "ecr:*",
+    "ecs:*",
+    "ec2:*",
+    "logs:*",
+    "cloudwatch:*"
   ]
 }
 

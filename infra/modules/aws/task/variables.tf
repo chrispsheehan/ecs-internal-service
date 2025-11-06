@@ -19,3 +19,7 @@ variable "memory" {
   type    = number
   default = 512
 }
+
+variable "image_uri" {
+  type = string
+}
