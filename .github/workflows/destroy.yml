@@ -32,5 +32,18 @@ jobs:
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task
+          tg_action: destroy
+
+  task:
+    needs: ecr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Destroy ecrs
+        uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/ecr
           tg_action: destroy

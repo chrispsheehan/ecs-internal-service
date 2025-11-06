@@ -39,17 +39,17 @@ jobs:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/oidc
 
-  # task:
-  #   needs: setup
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  task:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       env: 
-  #         TF_VAR_image_uri: ${{ inputs.backend_image_uri }}
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/task
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_image_uri: ${{ inputs.backend_image_uri }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task
