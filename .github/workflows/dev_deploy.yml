@@ -13,7 +13,6 @@ jobs:
     with:
       version: ${{ github.sha }}
       environment: dev
-      aws_account_id: 619090116609
 
   dev:
     uses: ./.github/workflows/deploy.yml

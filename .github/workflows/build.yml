@@ -9,18 +9,15 @@ on:
       environment:
         required: true
         type: string
-      aws_account_id:
-        required: true
-        type: string
     outputs:
       backend_image_uri:
         value: ${{ jobs.backend.outputs.image_uri }}
 
 env:
-  AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ inputs.aws_account_id }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
+  AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ vars.aws_account_id }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
   AWS_REGION: us-east-1
-  AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
-  environment: ${{inputs.environment}}
+  AWS_ACCOUNT_ID: ${{ vars.aws_account_id }}
+  environment: ${{ inputs.environment }}
   version: ${{ inputs.version }}
 
 jobs:
