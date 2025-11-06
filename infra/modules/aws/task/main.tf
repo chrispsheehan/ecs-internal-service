@@ -4,12 +4,12 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 resource "aws_iam_policy" "logs_access_policy" {
-  name   = "${local.formatted_name}_logs_access_policy"
+  name   = "${var.project_name}-logs-access-policy"
   policy = data.aws_iam_policy_document.logs_policy.json
 }
 
 resource "aws_iam_policy" "ecr_access_policy" {
-  name   = "${local.formatted_name}_ecr_access_policy"
+  name   = "${var.project_name}-ecr-access-policy"
   policy = data.aws_iam_policy_document.ecr_policy.json
 }
 
@@ -42,5 +42,5 @@ resource "aws_ecs_task_definition" "task" {
     operating_system_family = "LINUX"
   }
 
-  container_definitions = local.container_definitions
+  container_definitions = jsonencode(local.container_definition)
 }

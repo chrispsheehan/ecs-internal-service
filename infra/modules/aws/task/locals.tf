@@ -1,14 +1,56 @@
 locals {
-  formatted_name      = replace(var.project_name, "-", "_")
-  cloudwatch_log_name = "/ecs/${local.formatted_name}"
+  cloudwatch_log_name = "/ecs/${var.project_name}"
   image_uri           = var.image_uri
-  container_definitions = templatefile("${path.module}/container_definitions.tpl", {
-    container_name      = var.project_name
-    image_uri           = local.image_uri
-    container_port      = var.container_port
-    cpu                 = var.cpu
-    memory              = var.memory
-    aws_region          = var.aws_region
-    cloudwatch_log_name = local.cloudwatch_log_name
-  })
+
+  container_definition = [
+    {
+      name   = var.project_name
+      image  = local.image_uri
+      cpu    = var.cpu
+      memory = var.memory
+
+      portMappings = [
+        {
+          name          = "${var.project_name}-${var.container_port}-tcp"
+          containerPort = var.container_port
+          hostPort      = var.container_port
+          protocol      = "tcp"
+          appProtocol   = "http"
+        }
+      ]
+
+      healthcheck = {
+        command = [
+          "CMD-SHELL",
+          "wget --quiet --spider --tries=1 http://localhost:${var.container_port}/health || exit 1"
+        ]
+        interval     = 5
+        retries      = 1
+        start_period = 5
+        timeout      = 5
+      }
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "${local.cloudwatch_log_name}"
+          "awslogs-region"        = "${var.aws_region}"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+
+      essential = true
+      environment = [
+        {
+          name  = "IMAGE"
+          value = "${local.image_uri}"
+        }
+      ]
+
+      environmentFiles = []
+      mountPoints      = []
+      volumesFrom      = []
+      ulimits          = []
+    }
+  ]
 }
