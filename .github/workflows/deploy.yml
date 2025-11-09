@@ -42,6 +42,32 @@ jobs:
   task:
     needs: setup
     runs-on: ubuntu-latest
+    outputs:
+      task_definition_arn: ${{ steps.get-task.outputs.task_definition_arn }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: task
+        env: 
+          TF_VAR_image_uri: ${{ inputs.backend_image_uri }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task
+
+
+      - name: get task
+        id: get-task
+        env:
+          TG_OUTPUTS: ${{ steps.task.outputs.tg_outputs  }}
+        run: |
+          echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
+
+  ecs:
+    needs: task
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,7 +75,7 @@ jobs:
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         env: 
-          TF_VAR_image_uri: ${{ inputs.backend_image_uri }}
+          TF_VAR_task_definition_arn: ${{ needs.task.outputs.task_definition_arn }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-          tg_directory: infra/live/${{ inputs.environment }}/aws/task
+          tg_directory: infra/live/${{ inputs.environment }}/aws/ecs
