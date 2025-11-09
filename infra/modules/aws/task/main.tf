@@ -1,5 +1,6 @@
-resource "aws_iam_role" "ecs_task_role" {
-  name               = "${var.project_name}-ecs-task-role"
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name               = "${var.project_name}-ecs-task-execution-role"
+  description        = "Role used to pull from ECR and setup Cloudwatch logging access"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
@@ -14,18 +15,24 @@ resource "aws_iam_policy" "ecr_access_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "logs_access_policy_attachment" {
-  role       = aws_iam_role.ecs_task_role.name
+  role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.logs_access_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ecr_access_policy_attachment" {
-  role       = aws_iam_role.ecs_task_role.name
+  role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.ecr_access_policy.arn
 }
 
 resource "aws_cloudwatch_log_group" "ecs_log_group" {
   name              = local.cloudwatch_log_name
   retention_in_days = 1
+}
+
+resource "aws_iam_role" "ecs_task_role" {
+  name               = "${var.project_name}-ecs-task-role"
+  description        = "Role used to give the task runtime access"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_ecs_task_definition" "task" {
@@ -35,7 +42,8 @@ resource "aws_ecs_task_definition" "task" {
   cpu                      = var.cpu
   memory                   = var.memory
 
-  execution_role_arn = aws_iam_role.ecs_task_role.arn
+  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn      = aws_iam_role.ecs_task_role.arn
 
   runtime_platform {
     cpu_architecture        = "X86_64"
