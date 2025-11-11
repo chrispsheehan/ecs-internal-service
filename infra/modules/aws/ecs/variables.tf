@@ -15,5 +15,6 @@ variable "task_definition_arn" {
 }
 
 variable "local_tunnel" {
-  type = bool
+  type    = bool
+  default = false
 }
