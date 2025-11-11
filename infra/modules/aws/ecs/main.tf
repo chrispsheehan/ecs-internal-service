@@ -5,7 +5,7 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_security_group" "ecs_service" {
   name        = "${var.project_name}-ecs-sg"
   description = "ECS service private access only"
-  vpc_id      = data.aws_vpc.main.id
+  vpc_id      = data.aws_vpc.this.id
 
   # Allow inbound traffic from within the VPC
   ingress {
@@ -13,7 +13,7 @@ resource "aws_security_group" "ecs_service" {
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
+    cidr_blocks = [data.aws_vpc.this.cidr_block]
   }
 
   # Allow all outbound (for API calls, updates, etc.)
