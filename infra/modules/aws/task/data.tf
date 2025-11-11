@@ -55,3 +55,16 @@ data "aws_iam_policy_document" "ecr_policy" {
     resources = [data.aws_ecr_repository.this.arn]
   }
 }
+
+data "aws_iam_policy_document" "ssm_messages" {
+  statement {
+    actions = [
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+}

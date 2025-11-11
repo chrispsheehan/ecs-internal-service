@@ -36,3 +36,22 @@ tg-all op:
     #!/usr/bin/env bash
     cd {{justfile_directory()}}/infra/live 
     terragrunt run-all {{op}}
+
+get-task-id:
+    #!/usr/bin/env bash
+    aws ecs list-tasks \
+        --region eu-west-2 \
+        --cluster "ecs-internal-service-cluster" \
+        --service-name "ecs-internal-service-service" \
+        --desired-status RUNNING \
+        --query 'taskArns[-1]' --output text
+
+local-connect:
+    #!/usr/bin/env bash
+    TASK_ID=$(just get-task-id)
+    aws ecs execute-command \
+        --region eu-west-2 \
+        --cluster "ecs-internal-service-cluster" \
+        --task "$TASK_ID" \
+        --interactive \
+        --command "/bin/sh"

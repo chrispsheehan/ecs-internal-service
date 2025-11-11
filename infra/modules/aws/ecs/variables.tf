@@ -13,3 +13,13 @@ variable "container_port" {
 variable "task_definition_arn" {
   type = string
 }
+
+variable "local_tunnel" {
+  type    = bool
+  default = false
+}
+
+variable "wait_for_steady_state" {
+  type    = bool
+  default = true
+}
