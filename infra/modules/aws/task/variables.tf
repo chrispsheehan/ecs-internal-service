@@ -23,3 +23,7 @@ variable "memory" {
 variable "image_uri" {
   type = string
 }
+
+variable "local_tunnel" {
+  type = bool
+}
