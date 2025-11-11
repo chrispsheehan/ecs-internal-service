@@ -18,3 +18,8 @@ variable "local_tunnel" {
   type    = bool
   default = false
 }
+
+variable "wait_for_steady_state" {
+  type    = bool
+  default = true
+}

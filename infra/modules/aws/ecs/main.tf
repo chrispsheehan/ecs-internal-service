@@ -76,4 +76,5 @@ resource "aws_ecs_service" "service" {
   }
 
   enable_execute_command = var.local_tunnel ? true : false
+  wait_for_steady_state  = var.wait_for_steady_state
 }

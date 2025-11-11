@@ -1,9 +1,11 @@
 locals {
-  deploy_branches = ["*"]
-  local_tunnel    = true
+  deploy_branches       = ["*"]
+  wait_for_steady_state = false
+  local_tunnel          = true
 }
 
 inputs = {
-  deploy_branches = local.deploy_branches
-  local_tunnel    = local.local_tunnel
+  deploy_branches       = local.deploy_branches
+  wait_for_steady_state = local.wait_for_steady_state
+  local_tunnel          = local.local_tunnel
 }
