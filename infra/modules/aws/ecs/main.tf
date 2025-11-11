@@ -74,4 +74,6 @@ resource "aws_ecs_service" "service" {
     assign_public_ip = false
     security_groups  = [aws_security_group.ecs_service.id]
   }
+
+  enable_execute_command = var.local_tunnel ? true : false
 }

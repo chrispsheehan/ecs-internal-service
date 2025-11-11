@@ -13,3 +13,7 @@ variable "container_port" {
 variable "task_definition_arn" {
   type = string
 }
+
+variable "local_tunnel" {
+  type = bool
+}
