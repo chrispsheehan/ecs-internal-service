@@ -5,14 +5,15 @@ WORKDIR /usr/app
 
 # Install dependencies (adjust as per your real dependencies)
 COPY ./requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir gunicorn uvicorn[standard]
 
 # Copy app source
-COPY ./app ./app
+COPY ./src ./app
 
 # Expose port
 ENV PORT=3000
 EXPOSE 3000
 
 # Run app using uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:3000", "app.app:app"]
