@@ -1,35 +1,35 @@
 name: xray-stack
 services:
-  # # X-Ray daemon (listens on UDP 2000 for segments)
-  # xray-daemon:
-  #   image: amazon/aws-xray-daemon:latest
-  #   container_name: xray-daemon
-  #   command: ["-o", "-l", "dev"]   # local dev mode; remove for prod
-  #   environment:
-  #     AWS_REGION: us-east-1
-  #     AWS_PROFILE: merlin-dev/ad
-  #   ports:
-  #     - "2000:2000/udp"            # segment UDP port
-  #     - "2000:2000"                # optional TCP sampling API
-  #   volumes:
-  #     - ~/.aws:/root/.aws:ro       # use your local AWS creds (optional)
-  #   networks:
-  #     - tracing
-  #   restart: unless-stopped
+  # X-Ray daemon (listens on UDP 2000 for segments)
+  xray-daemon:
+    image: amazon/aws-xray-daemon:latest
+    container_name: xray-daemon
+    env_file: .env
+    command: ["-o", "-l", "dev"]   # local dev mode; remove for prod
+    # environment:
+      # AWS_REGION: us-east-1
+      # AWS_PROFILE: merlin-dev/ad
+    ports:
+      - "2000:2000/udp"            # segment UDP port
+      - "2000:2000"                # optional TCP sampling API
+    networks:
+      - tracing
 
   # Example app that will send traces via the X-Ray SDK/agent
   app:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: fast-api-app
     environment:
       AWS_REGION: us-east-1
       # X-Ray SDKs default to 127.0.0.1:2000 UDP inside the same container.
       # When sending over the docker network, point to xray-daemon:2000.
       # For many SDKs, set AWS_XRAY_DAEMON_ADDRESS (host:port).
-      AWS_XRAY_DAEMON_ADDRESS: xray-daemon:2000
-    # depends_on:
-    #   - xray-daemon
+      XRAY_ENDPOINT: http://xray-daemon:2000
+      IMAGE: your-image-name
+    depends_on:
+      - xray-daemon
     networks:
       - tracing
     ports:

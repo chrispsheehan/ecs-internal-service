@@ -5,8 +5,7 @@ WORKDIR /usr/app
 
 # Install dependencies (adjust as per your real dependencies)
 COPY ./requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir gunicorn uvicorn[standard]
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app source
 COPY ./src ./app
