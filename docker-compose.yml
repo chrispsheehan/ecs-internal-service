@@ -1,39 +1,49 @@
-name: xray-stack
 services:
-  # X-Ray daemon (listens on UDP 2000 for segments)
   xray-daemon:
     image: amazon/aws-xray-daemon:latest
     container_name: xray-daemon
-    env_file: .env
-    command: ["-o", "-l", "dev"]   # local dev mode; remove for prod
-    # environment:
-      # AWS_REGION: us-east-1
-      # AWS_PROFILE: merlin-dev/ad
     ports:
-      - "2000:2000/udp"            # segment UDP port
-      - "2000:2000"                # optional TCP sampling API
+      - "2000:2000/udp"
+    env_file:
+      - .env
+    volumes:
+      - ~/.aws:/root/.aws:ro
+    command: ["-o"]
+    # restart: unless-stopped
     networks:
       - tracing
 
-  # Example app that will send traces via the X-Ray SDK/agent
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: fast-api-app
-    environment:
-      AWS_REGION: us-east-1
-      # X-Ray SDKs default to 127.0.0.1:2000 UDP inside the same container.
-      # When sending over the docker network, point to xray-daemon:2000.
-      # For many SDKs, set AWS_XRAY_DAEMON_ADDRESS (host:port).
-      XRAY_ENDPOINT: http://xray-daemon:2000
-      IMAGE: your-image-name
-    depends_on:
-      - xray-daemon
+  otel-collector:
+    image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+    container_name: otel-collector
+    ports:
+      - "4317:4317"
+    env_file:
+      - .env
+    volumes:
+      - ./collector-config.yaml:/etc/collector-config.yaml:ro
+      - ~/.aws:/root/.aws:ro
+    command: ["--config", "/etc/collector-config.yaml"]
+    # restart: unless-stopped
     networks:
       - tracing
-    ports:
-      - "8000:3000"   # example app port
+
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: fast-api-app
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     AWS_XRAY_ENDPOINT: http://xray-daemon:2000
+  #     IMAGE: your-image-name
+  #   depends_on:
+  #     - xray-daemon
+  #   ports:
+  #     - "8000:3000"
+  #   networks:
+  #     - tracing
 
 networks:
   tracing:
