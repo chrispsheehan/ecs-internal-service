@@ -13,6 +13,8 @@ xray_endpoint = os.getenv("XRAY_ENDPOINT", "NOT_FOUND")
 
 app = FastAPI()
 
+tracer = trace.get_tracer("chris-local")
+
 # Set up OpenTelemetry with AWS X-Ray support
 trace.set_tracer_provider(
     TracerProvider(id_generator=AwsXRayIdGenerator())
@@ -26,9 +28,10 @@ FastAPIInstrumentor().instrument_app(app)
 
 
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
-    print(f"Request received: {request.method} {request.url.path}")
-    response = await call_next(request)
+async def otel_middleware(request: Request, call_next):
+    span_name = f"HTTP {request.method} {request.url.path}"
+    with tracer.start_as_current_span(span_name):
+        response = await call_next(request)
     return response
 
 @app.get("/health")
