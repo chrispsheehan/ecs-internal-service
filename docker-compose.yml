@@ -4,6 +4,7 @@ services:
     container_name: otel-collector
     ports:
       - "4317:4317"
+      - "13133:13133"
     env_file:
       - .env
     volumes:
@@ -12,33 +13,37 @@ services:
     command: ["--config", "/etc/collector-config.yaml"]
     networks:
       - tracing
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:13133/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: fast-api-app
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     AWS_XRAY_ENDPOINT: http://otel-collector:4317
+  #     IMAGE: docker-compose-image
+  #   depends_on:
+  #     - otel-collector
+  #   ports:
+  #     - "8000:3000"
+  #   networks:
+  #     - tracing
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: fast-api-app
-    env_file:
-      - .env
-    environment:
-      AWS_XRAY_ENDPOINT: http://otel-collector:4317
-      IMAGE: docker-compose-image
-    depends_on:
-      - otel-collector
-    ports:
-      - "8000:3000"
-    networks:
-      - tracing
-
-  debug:
-    image: alpine:latest
-    container_name: debug-tool
-    depends_on:
-      - app
-    networks:
-      - tracing
-    command: >
-      sh -c "apk add --no-cache curl && sleep infinity"
+  # debug:
+  #   image: alpine:latest
+  #   container_name: debug-tool
+  #   depends_on:
+  #     - app
+  #   networks:
+  #     - tracing
+  #   command: >
+  #     sh -c "apk add --no-cache curl && sleep infinity"
 
 networks:
   tracing:
