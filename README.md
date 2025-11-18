@@ -9,3 +9,10 @@ just tg dev aws/oidc apply
 ## 🚀 aws requirements
 
 needs vpc named vpc with private and public subnets
+
+
+start locally with `docker compose up --build`
+
+debug with `docker exec -it debug-tool /bin/sh`
+
+can hit the app with `curl http://app:3000/health`
