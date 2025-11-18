@@ -1,6 +1,8 @@
 services:
   otel-collector:
-    image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: otel-collector
     ports:
       - "4317:4317"
@@ -8,9 +10,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./dc-collector-config.yaml:/etc/collector-config.yaml:ro
+      - ./dc-collector-config.yaml:/opt/aws/aws-otel-collector/etc/collector-config.yaml:ro
       - ~/.aws:/root/.aws:ro
-    command: ["--config", "/etc/collector-config.yaml"]
     networks:
       - tracing
     # healthcheck:
