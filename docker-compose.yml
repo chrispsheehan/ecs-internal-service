@@ -10,7 +10,6 @@ services:
       - ./dc-collector-config.yaml:/etc/collector-config.yaml:ro
       - ~/.aws:/root/.aws:ro
     command: ["--config", "/etc/collector-config.yaml"]
-    # restart: unless-stopped
     networks:
       - tracing
 
