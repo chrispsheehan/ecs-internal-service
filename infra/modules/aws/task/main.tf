@@ -63,5 +63,13 @@ resource "aws_ecs_task_definition" "task" {
     operating_system_family = "LINUX"
   }
 
-  container_definitions = jsonencode(local.container_definition)
+  container_definitions = jsonencode(local.container_definitions)
+
+  dynamic "volume" {
+    for_each = local.task_volumes
+    content {
+      name      = volume.value.name
+      host_path = volume.value.host_path
+    }
+  }
 }
