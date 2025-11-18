@@ -80,8 +80,6 @@ locals {
       }
     }
 
-    command = ["--config", "/etc/collector-config.yaml"]
-
     essential   = false
     environment = local.shared_environment
   }
