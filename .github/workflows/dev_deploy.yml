@@ -21,3 +21,4 @@ jobs:
       environment: dev
       infra_version: ${{ github.sha }}
       backend_image_uri: ${{ needs.build.outputs.backend_image_uri }}
+      aws_otel_collector_image_uri: ${{ needs.build.outputs.aws_otel_collector_image_uri }}

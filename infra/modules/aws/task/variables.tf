@@ -24,6 +24,10 @@ variable "image_uri" {
   type = string
 }
 
+variable "aws_otel_collector_image_uri" {
+  type = string
+}
+
 variable "local_tunnel" {
   type = bool
 }

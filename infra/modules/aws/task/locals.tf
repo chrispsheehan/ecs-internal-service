@@ -1,7 +1,7 @@
 locals {
   cloudwatch_log_name          = "/ecs/${var.project_name}"
   image_uri                    = var.image_uri
-  aws_otel_collector_image_uri = "public.ecr.aws/aws-observability/aws-otel-collector:latest"
+  aws_otel_collector_image_uri = var.aws_otel_collector_image_uri
 
   shared_environment = [
     {
