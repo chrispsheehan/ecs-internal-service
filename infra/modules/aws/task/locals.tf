@@ -2,7 +2,6 @@ locals {
   cloudwatch_log_name          = "/ecs/${var.project_name}"
   image_uri                    = var.image_uri
   aws_otel_collector_image_uri = "public.ecr.aws/aws-observability/aws-otel-collector:latest"
-  collector_config_path        = "${path.module}/collector-config.yaml"
 
   shared_environment = [
     {
@@ -18,13 +17,6 @@ locals {
   container_definitions = [
     local.api_container,
     local.otel-collector
-  ]
-
-  task_volumes = [
-    {
-      name      = "collector-config"
-      host_path = local.collector_config_path
-    }
   ]
 
   api_container = {
@@ -76,14 +68,6 @@ locals {
         protocol      = "tcp"
         appProtocol   = "http"
       }
-    ]
-
-    mountPoints = [
-      {
-        sourceVolume  = "collector-config",
-        containerPath = "/etc/collector-config.yaml",
-        readOnly      = true
-      },
     ]
 
     command = ["--config", "/etc/collector-config.yaml"]

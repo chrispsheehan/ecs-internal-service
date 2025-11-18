@@ -64,12 +64,4 @@ resource "aws_ecs_task_definition" "task" {
   }
 
   container_definitions = jsonencode(local.container_definitions)
-
-  dynamic "volume" {
-    for_each = local.task_volumes
-    content {
-      name      = volume.value.name
-      host_path = volume.value.host_path
-    }
-  }
 }
