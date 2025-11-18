@@ -84,7 +84,7 @@ start:
     #!/usr/bin/env bash
     just start-adot-collector
     source env/bin/activate
-    XRAY_ENDPOINT="http://localhost:4317" uvicorn src.app:app --reload --host 0.0.0.0 --port 8000 &
+    AWS_XRAY_ENDPOINT="http://localhost:4317" uvicorn src.app:app --reload --host 0.0.0.0 --port 8000 &
 
     echo "FastAPI is running with debugpy enabled on port 8000"
     echo "Open VS Code and attach debugger to 'FastAPI: Uvicorn (reload)' configuration to debug."

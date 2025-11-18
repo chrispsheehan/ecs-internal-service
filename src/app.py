@@ -9,7 +9,7 @@ from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 image = os.getenv("IMAGE", "NOT_FOUND")
-xray_endpoint = os.getenv("XRAY_ENDPOINT", "NOT_FOUND")
+xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
 
 app = FastAPI()
 

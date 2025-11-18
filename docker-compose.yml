@@ -21,7 +21,7 @@ services:
     env_file:
       - .env
     environment:
-      XRAY_ENDPOINT: http://otel-collector:4317
+      AWS_XRAY_ENDPOINT: http://otel-collector:4317
       IMAGE: docker-compose-image
     depends_on:
       - otel-collector
