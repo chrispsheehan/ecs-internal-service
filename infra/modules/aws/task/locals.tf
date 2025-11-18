@@ -75,8 +75,8 @@ locals {
     portMappings = [
       {
         name          = "${var.project_name}-otel-collector-${var.container_port}-tcp"
-        containerPort = "4317"
-        hostPort      = "4317"
+        containerPort = 4317
+        hostPort      = 4317
         protocol      = "tcp"
         appProtocol   = "http"
       }
