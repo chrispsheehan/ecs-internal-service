@@ -31,7 +31,9 @@ data "aws_iam_policy_document" "logs_policy" {
 
     resources = [
       "${aws_cloudwatch_log_group.ecs_log_group.arn}",
-      "${aws_cloudwatch_log_group.ecs_log_group.arn}:*"
+      "${aws_cloudwatch_log_group.ecs_log_group.arn}:*",
+      "${aws_cloudwatch_log_group.ecs_otel_log_group.arn}",
+      "${aws_cloudwatch_log_group.ecs_otel_log_group.arn}:*"
     ]
   }
 }

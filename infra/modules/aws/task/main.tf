@@ -42,6 +42,11 @@ resource "aws_cloudwatch_log_group" "ecs_log_group" {
   retention_in_days = 1
 }
 
+resource "aws_cloudwatch_log_group" "ecs_otel_log_group" {
+  name              = local.cloudwatch_otel_log_name
+  retention_in_days = 1
+}
+
 resource "aws_iam_role" "ecs_task_role" {
   name               = "${var.project_name}-ecs-task-role"
   description        = "Role used to give the task runtime access"

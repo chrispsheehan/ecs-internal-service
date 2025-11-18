@@ -13,11 +13,11 @@ services:
     command: ["--config", "/etc/collector-config.yaml"]
     networks:
       - tracing
-    healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:13133/ || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    # healthcheck:
+    #   test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:13133/ || exit 1"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
   # app:
   #   build:
   #     context: .

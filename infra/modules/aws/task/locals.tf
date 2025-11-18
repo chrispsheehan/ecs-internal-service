@@ -1,5 +1,6 @@
 locals {
   cloudwatch_log_name          = "/ecs/${var.project_name}"
+  cloudwatch_otel_log_name     = "/ecs/${var.project_name}/otel"
   image_uri                    = var.image_uri
   aws_otel_collector_image_uri = var.aws_otel_collector_image_uri
 
@@ -69,6 +70,15 @@ locals {
         appProtocol   = "http"
       }
     ]
+
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = "${local.cloudwatch_otel_log_name}"
+        "awslogs-region"        = "${var.aws_region}"
+        "awslogs-stream-prefix" = "ecs"
+      }
+    }
 
     command = ["--config", "/etc/collector-config.yaml"]
 
