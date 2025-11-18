@@ -1,18 +1,4 @@
 services:
-  xray-daemon:
-    image: amazon/aws-xray-daemon:latest
-    container_name: xray-daemon
-    ports:
-      - "2000:2000/udp"
-    env_file:
-      - .env
-    volumes:
-      - ~/.aws:/root/.aws:ro
-    command: ["-o"]
-    # restart: unless-stopped
-    networks:
-      - tracing
-
   otel-collector:
     image: public.ecr.aws/aws-observability/aws-otel-collector:latest
     container_name: otel-collector
@@ -21,29 +7,29 @@ services:
     env_file:
       - .env
     volumes:
-      - ./collector-config.yaml:/etc/collector-config.yaml:ro
+      - ./dc-collector-config.yaml:/etc/collector-config.yaml:ro
       - ~/.aws:/root/.aws:ro
     command: ["--config", "/etc/collector-config.yaml"]
     # restart: unless-stopped
     networks:
       - tracing
 
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fast-api-app
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     AWS_XRAY_ENDPOINT: http://xray-daemon:2000
-  #     IMAGE: your-image-name
-  #   depends_on:
-  #     - xray-daemon
-  #   ports:
-  #     - "8000:3000"
-  #   networks:
-  #     - tracing
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fast-api-app
+    env_file:
+      - .env
+    environment:
+      XRAY_ENDPOINT: http://otel-collector:4317
+      IMAGE: docker-compose-image
+    depends_on:
+      - otel-collector
+    ports:
+      - "8000:3000"
+    networks:
+      - tracing
 
 networks:
   tracing:
