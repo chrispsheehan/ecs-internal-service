@@ -31,8 +31,6 @@ locals {
     name        = var.project_name
     networkMode = "awsvpc"
     image       = local.image_uri
-    cpu         = var.cpu
-    memory      = var.memory
 
     portMappings = [
       {
@@ -67,10 +65,8 @@ locals {
   }
 
   otel-collector = {
-    name   = "${var.project_name}-otel-collector"
-    image  = local.aws_otel_collector_image_uri
-    cpu    = var.cpu
-    memory = var.memory
+    name  = "${var.project_name}-otel-collector"
+    image = local.aws_otel_collector_image_uri
 
     portMappings = [
       {
