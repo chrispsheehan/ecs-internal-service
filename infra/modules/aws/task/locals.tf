@@ -55,6 +55,8 @@ locals {
         value = "http://localhost:4317"
       }
     ])
+
+    command = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "app.app:app"]
   }
 
   otel-collector = {
@@ -79,6 +81,8 @@ locals {
         "awslogs-stream-prefix" = "ecs"
       }
     }
+
+    command = ["--config", "/opt/aws/aws-otel-collector/etc/collector-config.yaml"]
 
     essential   = false
     environment = local.shared_environment
