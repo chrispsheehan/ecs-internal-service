@@ -53,5 +53,42 @@ local-connect:
         --region eu-west-2 \
         --cluster "ecs-internal-service-cluster" \
         --task "$TASK_ID" \
+        --container "ecs-internal-service-debug" \
         --interactive \
         --command "/bin/sh"
+
+
+install:
+    #!/usr/bin/env bash
+    python3 -m venv env
+    source env/bin/activate
+    pip3 install -r requirements.txt
+
+
+start-adot-collector:
+    #!/usr/bin/env bash
+    CONTAINER_NAME="aws-adot-collector"
+    if [ "$(docker ps -q -f name=${CONTAINER_NAME})" ]; then
+        echo "Container '${CONTAINER_NAME}' is already running."
+    else
+        echo "Starting container '${CONTAINER_NAME}'..."
+        docker run -d -p 4317:4317 \
+            -v $(pwd)/collector-config.yaml:/etc/collector-config.yaml:ro \
+            -v ~/.aws:/root/.aws:ro \
+            --env-file $(pwd)/.env \
+            --name ${CONTAINER_NAME} \
+            public.ecr.aws/aws-observability/aws-otel-collector:latest \
+            --config /etc/collector-config.yaml
+    fi
+
+start:
+    #!/usr/bin/env bash
+    just start-adot-collector
+    source env/bin/activate
+    AWS_XRAY_ENDPOINT="http://localhost:4317" uvicorn src.app:app --reload --host 0.0.0.0 --port 8000 &
+
+    echo "FastAPI is running with debugpy enabled on port 8000"
+    echo "Open VS Code and attach debugger to 'FastAPI: Uvicorn (reload)' configuration to debug."
+
+    # Wait for uvicorn to exit before script ends, if needed
+    wait

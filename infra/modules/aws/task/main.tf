@@ -42,10 +42,25 @@ resource "aws_cloudwatch_log_group" "ecs_log_group" {
   retention_in_days = 1
 }
 
+resource "aws_cloudwatch_log_group" "ecs_otel_log_group" {
+  name              = local.cloudwatch_otel_log_name
+  retention_in_days = 1
+}
+
 resource "aws_iam_role" "ecs_task_role" {
   name               = "${var.project_name}-ecs-task-role"
   description        = "Role used to give the task runtime access"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+resource "aws_iam_policy" "xray_put_policy" {
+  name   = "${var.project_name}-xray-put-policy"
+  policy = data.aws_iam_policy_document.xray_put.json
+}
+
+resource "aws_iam_role_policy_attachment" "xray_put_policy_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.xray_put_policy.arn
 }
 
 resource "aws_ecs_task_definition" "task" {
@@ -63,5 +78,5 @@ resource "aws_ecs_task_definition" "task" {
     operating_system_family = "LINUX"
   }
 
-  container_definitions = jsonencode(local.container_definition)
+  container_definitions = jsonencode(local.container_definitions)
 }

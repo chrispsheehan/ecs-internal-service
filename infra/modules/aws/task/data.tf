@@ -31,7 +31,9 @@ data "aws_iam_policy_document" "logs_policy" {
 
     resources = [
       "${aws_cloudwatch_log_group.ecs_log_group.arn}",
-      "${aws_cloudwatch_log_group.ecs_log_group.arn}:*"
+      "${aws_cloudwatch_log_group.ecs_log_group.arn}:*",
+      "${aws_cloudwatch_log_group.ecs_otel_log_group.arn}",
+      "${aws_cloudwatch_log_group.ecs_otel_log_group.arn}:*"
     ]
   }
 }
@@ -63,6 +65,20 @@ data "aws_iam_policy_document" "ssm_messages" {
       "ssmmessages:CreateDataChannel",
       "ssmmessages:OpenControlChannel",
       "ssmmessages:OpenDataChannel"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+}
+
+data "aws_iam_policy_document" "xray_put" {
+  statement {
+    actions = [
+      "xray:PutTraceSegments",
+      "xray:PutTelemetryRecords",
+      "xray:GetSamplingRules",
+      "xray:GetSamplingTargets",
+      "xray:GetSamplingStatisticSummaries"
     ]
     effect    = "Allow"
     resources = ["*"]

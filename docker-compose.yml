@@ -1,0 +1,49 @@
+services:
+  otel-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: collector
+    container_name: otel-collector
+    ports:
+      - "4317:4317"
+    env_file:
+      - .env
+    volumes:
+      - ./dc-collector-config.yaml:/opt/aws/aws-otel-collector/etc/collector-config.yaml:ro
+      - ~/.aws:/root/.aws:ro
+    networks:
+      - tracing
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    container_name: fast-api-app
+    env_file:
+      - .env
+    environment:
+      AWS_XRAY_ENDPOINT: http://otel-collector:4317
+      IMAGE: docker-compose-image
+    depends_on:
+      - otel-collector
+    ports:
+      - "8000:3000"
+    networks:
+      - tracing
+
+  debug:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: debug
+    container_name: debug-tool
+    depends_on:
+      - app
+    networks:
+      - tracing
+
+networks:
+  tracing:
+    driver: bridge

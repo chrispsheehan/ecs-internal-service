@@ -41,3 +41,8 @@ override.tf.json
 terraform.rc
 
 *.DS_store
+
+env
+.env
+
+__pycache__

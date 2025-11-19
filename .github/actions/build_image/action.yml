@@ -24,6 +24,10 @@ inputs:
     description: 'CodeArtifact aws account id'
     required: true
     default: '883121098928'
+  docker_file_path:
+    description: 'Path to docker file to build'
+    required: true
+    default: './Dockerfile'
 
 runs:
   using: 'composite'
@@ -49,10 +53,10 @@ runs:
       run: |
         if [ -n "${{ inputs.target }}" ]; then
           echo "Building with target '${{ inputs.target }}'"
-          docker build --target ${{ inputs.target }} -t $TAG .
+          docker build --target ${{ inputs.target }} -t $TAG . -f ${{ inputs.docker_file_path }}
         else
           echo "Building without target"
-          docker build -t $TAG .
+          docker build -t $TAG . -f ${{ inputs.docker_file_path }}
         fi
         echo "Image Built for version $TAG"
 

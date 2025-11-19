@@ -1,14 +1,33 @@
-# Base Image
-FROM node:14-alpine
+# ---- Stage 1: FastAPI App ----
+FROM python:3.11-slim AS app
 
 WORKDIR /usr/app
 
-ENV PORT=3000
+# Install dependencies
+COPY ./requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy app source
+COPY ./src ./app
+
+# Set env and expose port
+ENV PORT=3000
 EXPOSE 3000
 
-COPY ./package.json ./
-RUN npm install
-COPY ./src ./
+# Default command for app
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:3000", "app.app:app"]
 
-CMD ["node", "app.js"]
+# ---- Stage 2: Collector ----
+FROM public.ecr.aws/aws-observability/aws-otel-collector:latest AS collector
+
+COPY ./collector-config.yaml /opt/aws/aws-otel-collector/etc/collector-config.yaml
+
+CMD ["--config", "/opt/aws/aws-otel-collector/etc/collector-config.yaml"]
+
+
+# ---- Stage 3: DEBUG ----
+FROM alpine:latest AS debug
+
+RUN apk add --no-cache curl
+
+CMD ["sleep", "infinity"]
