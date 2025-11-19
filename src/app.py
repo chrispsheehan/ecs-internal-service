@@ -13,8 +13,6 @@ xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
 
 app = FastAPI()
 
-tracer = trace.get_tracer("chris-local")
-
 # Set up OpenTelemetry with AWS X-Ray support
 trace.set_tracer_provider(
     TracerProvider(id_generator=AwsXRayIdGenerator())
