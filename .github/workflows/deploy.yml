@@ -17,6 +17,10 @@ on:
         required: true
         type: string
         description: Image to be deployed to ECS
+      debug_image_uri:
+        required: true
+        type: string
+        description: Image to be deployed to ECS
 
 
 concurrency: # only run one instance of workflow at any one time
@@ -58,6 +62,7 @@ jobs:
         env: 
           TF_VAR_image_uri: ${{ inputs.backend_image_uri }}
           TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
+          TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task

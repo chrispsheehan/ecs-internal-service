@@ -3,6 +3,7 @@ locals {
   cloudwatch_otel_log_name     = "/ecs/${var.project_name}/otel"
   image_uri                    = var.image_uri
   aws_otel_collector_image_uri = var.aws_otel_collector_image_uri
+  debug_image_uri = var.debug_image_uri
 
   shared_environment = [
     {
@@ -16,11 +17,12 @@ locals {
   ]
 
   container_definitions = [
-    local.api_container,
-    local.otel-collector
+    local.api-container,
+    local.otel-collector,
+    local.debug-container
   ]
 
-  api_container = {
+  api-container = {
     name        = var.project_name
     networkMode = "awsvpc"
     image       = local.image_uri
@@ -86,5 +88,14 @@ locals {
 
     essential   = false
     environment = local.shared_environment
+  }
+
+  debug-container = {
+    name  = "${var.project_name}-debug"
+    image = local.debug_image_uri
+
+    command = ["sleep", "infinity"]
+
+    essential   = false
   }
 }
