@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 from fastapi import FastAPI, Request
-from aws_xray_sdk.core import xray_recorder, patch_all
 import boto3
 import requests
 from opentelemetry import trace
@@ -15,9 +14,6 @@ image = os.getenv("IMAGE", "NOT_FOUND")
 xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
 
 app = FastAPI()
-
-# Automatically instrument boto3, requests, and other supported libraries
-patch_all()
 
 tracer = trace.get_tracer(__name__)
 
@@ -58,21 +54,18 @@ async def host_info():
 
 @app.get("/boto3-test")
 def boto3_test():
-    segment = xray_recorder.begin_segment('boto3-test')
-    try:
-        buckets = s3_client.list_buckets()
+    with tracer.start_as_current_span("boto3-test-span") as span:
+        buckets = s3_client.list_buckets()  # Your boto3 call
         bucket_names = [b["Name"] for b in buckets.get("Buckets", [])]
-    finally:
-        xray_recorder.end_segment()
+        span.set_attribute("bucket.count", len(bucket_names))
     return {"bucket_names": bucket_names}
 
 @app.get("/requests-test")
 def requests_test():
-    segment = xray_recorder.begin_segment('requests-test')
-    try:
-        response = requests.get("https://example.com")
-    finally:
-        xray_recorder.end_segment()
+    with tracer.start_as_current_span("requests-test-span") as span:
+        response = requests.get("https://example.com")  # Your requests call
+        span.set_attribute("http.status_code", response.status_code)
+        span.set_attribute("http.response_length", len(response.content))
     return {
         "status_code": response.status_code,
         "message": f"Received {len(response.content)} bytes",
