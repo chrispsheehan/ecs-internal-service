@@ -70,3 +70,17 @@ data "aws_iam_policy_document" "ssm_messages" {
     resources = ["*"]
   }
 }
+
+data "aws_iam_policy_document" "xray_put" {
+  statement {
+    actions = [
+      "xray:PutTraceSegments",
+      "xray:PutTelemetryRecords",
+      "xray:GetSamplingRules",
+      "xray:GetSamplingTargets",
+      "xray:GetSamplingStatisticSummaries"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+}

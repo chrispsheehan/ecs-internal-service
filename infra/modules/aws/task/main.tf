@@ -53,6 +53,16 @@ resource "aws_iam_role" "ecs_task_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
+resource "aws_iam_policy" "xray_put_policy" {
+  name   = "${var.project_name}-xray-put-policy"
+  policy = data.aws_iam_policy_document.xray_put.json
+}
+
+resource "aws_iam_role_policy_attachment" "xray_put_policy_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.xray_put_policy.arn
+}
+
 resource "aws_ecs_task_definition" "task" {
   family                   = "${var.project_name}-task"
   network_mode             = "awsvpc"

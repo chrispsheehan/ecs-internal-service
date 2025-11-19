@@ -3,7 +3,7 @@ locals {
   cloudwatch_otel_log_name     = "/ecs/${var.project_name}/otel"
   image_uri                    = var.image_uri
   aws_otel_collector_image_uri = var.aws_otel_collector_image_uri
-  debug_image_uri = var.debug_image_uri
+  debug_image_uri              = var.debug_image_uri
 
   shared_environment = [
     {
@@ -96,6 +96,6 @@ locals {
 
     command = ["sleep", "infinity"]
 
-    essential   = false
+    essential = false
   }
 }
