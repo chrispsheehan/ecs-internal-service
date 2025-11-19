@@ -65,6 +65,7 @@ jobs:
           ecr_repository_name: ${{ needs.ecr.outputs.ecr_repo_name }}
           version: ${{ env.version }}
           push-role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN }}
+          target: app
 
       - id: set_uri
         run: |
@@ -88,7 +89,7 @@ jobs:
           ecr_repository_name: ${{ needs.ecr.outputs.ecr_repo_name }}
           version: ${{ env.version }}
           push-role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN }}
-          docker_file_path: "./Dockerfile.aws-otel-collector"
+          target: collector
 
       - id: set_uri
         run: |

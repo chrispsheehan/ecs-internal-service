@@ -1,18 +1,25 @@
-# Base image with python 3.11 slim
-FROM python:3.11-slim
+# ---- Stage 1: FastAPI App ----
+FROM python:3.11-slim AS app
 
 WORKDIR /usr/app
 
-# Install dependencies (adjust as per your real dependencies)
+# Install dependencies
 COPY ./requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app source
 COPY ./src ./app
 
-# Expose port
+# Set env and expose port
 ENV PORT=3000
 EXPOSE 3000
 
-# Run app using uvicorn
+# Default command for app
 CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:3000", "app.app:app"]
+
+# ---- Stage 2: Collector ----
+FROM public.ecr.aws/aws-observability/aws-otel-collector:latest AS collector
+
+COPY ./collector-config.yaml /opt/aws/aws-otel-collector/etc/collector-config.yaml
+
+CMD ["/otelcontribcol", "--config", "/opt/aws/aws-otel-collector/etc/collector-config.yaml"]

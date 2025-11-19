@@ -41,7 +41,7 @@ runs:
       shell: bash
       run: |
         if [ -n "${{ inputs.target }}" ]; then
-          echo "TAG=${{ inputs.target }}-${{ inputs.version }}" >> $GITHUB_ENV
+          echo "TAG=${{ inputs.target }}:${{ inputs.version }}" >> $GITHUB_ENV
         else
           echo "TAG=${{ inputs.version }}" >> $GITHUB_ENV
         fi
