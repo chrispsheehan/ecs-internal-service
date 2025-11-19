@@ -9,6 +9,8 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
 
 image = os.getenv("IMAGE", "NOT_FOUND")
 xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
@@ -29,6 +31,9 @@ trace.get_tracer_provider().add_span_processor(
 )
 
 FastAPIInstrumentor().instrument_app(app)
+RequestsInstrumentor().instrument()
+BotocoreInstrumentor().instrument()
+
 
 
 @app.middleware("http")
@@ -54,18 +59,14 @@ async def host_info():
 
 @app.get("/boto3-test")
 def boto3_test():
-    with tracer.start_as_current_span("boto3-test-span") as span:
-        buckets = s3_client.list_buckets()  # Your boto3 call
-        bucket_names = [b["Name"] for b in buckets.get("Buckets", [])]
-        span.set_attribute("bucket.count", len(bucket_names))
+    buckets = s3_client.list_buckets()  # boto3 call automatically traced
+    bucket_names = [b["Name"] for b in buckets.get("Buckets", [])]
     return {"bucket_names": bucket_names}
+
 
 @app.get("/requests-test")
 def requests_test():
-    with tracer.start_as_current_span("requests-test-span") as span:
-        response = requests.get("https://example.com")  # Your requests call
-        span.set_attribute("http.status_code", response.status_code)
-        span.set_attribute("http.response_length", len(response.content))
+    response = requests.get("https://example.com")  # requests call automatically traced
     return {
         "status_code": response.status_code,
         "message": f"Received {len(response.content)} bytes",
