@@ -35,3 +35,7 @@ variable "debug_image_uri" {
 variable "local_tunnel" {
   type = bool
 }
+
+variable "xray_enabled" {
+  type = bool
+}

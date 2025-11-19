@@ -16,11 +16,18 @@ locals {
     }
   ]
 
-  container_definitions = [
-    local.api-container,
-    local.otel-collector,
-    local.debug-container
+  base_containers = [
+    local.api-container
   ]
+
+  debug_sidecar = var.local_tunnel ? [local.debug-container] : []
+  xray_sidecar  = var.xray_enabled ? [local.otel-collector] : []
+
+  container_definitions = concat(
+    local.base_containers,
+    local.debug_sidecar,
+    local.xray_sidecar
+  )
 
   api-container = {
     name        = var.project_name
