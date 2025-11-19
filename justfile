@@ -53,6 +53,7 @@ local-connect:
         --region eu-west-2 \
         --cluster "ecs-internal-service-cluster" \
         --task "$TASK_ID" \
+        --container "ecs-internal-service-debug" \
         --interactive \
         --command "/bin/sh"
 
