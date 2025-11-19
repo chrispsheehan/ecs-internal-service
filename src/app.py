@@ -16,12 +16,12 @@ xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
 
 app = FastAPI()
 
+# Automatically instrument boto3, requests, and other supported libraries
+patch_all()
+
 tracer = trace.get_tracer(__name__)
 
 s3_client = boto3.client('s3')
-
-# Automatically instrument boto3, requests, and other supported libraries
-patch_all()
 
 # Set up OpenTelemetry with AWS X-Ray support
 trace.set_tracer_provider(
@@ -58,15 +58,21 @@ async def host_info():
 
 @app.get("/boto3-test")
 def boto3_test():
-    # This call is automatically traced by AWS X-Ray SDK due to patch_all()
-    buckets = s3_client.list_buckets()
-    bucket_names = [b["Name"] for b in buckets.get("Buckets", [])]
+    segment = xray_recorder.begin_segment('boto3-test')
+    try:
+        buckets = s3_client.list_buckets()
+        bucket_names = [b["Name"] for b in buckets.get("Buckets", [])]
+    finally:
+        xray_recorder.end_segment()
     return {"bucket_names": bucket_names}
 
 @app.get("/requests-test")
 def requests_test():
-    # This HTTP call to example.com is automatically traced by AWS X-Ray SDK
-    response = requests.get("https://example.com")
+    segment = xray_recorder.begin_segment('requests-test')
+    try:
+        response = requests.get("https://example.com")
+    finally:
+        xray_recorder.end_segment()
     return {
         "status_code": response.status_code,
         "message": f"Received {len(response.content)} bytes",
