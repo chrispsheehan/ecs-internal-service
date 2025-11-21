@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 import boto3
 import requests
 import httpx
@@ -35,10 +35,6 @@ trace.set_tracer_provider(
     )
 )
 
-
-# trace.set_tracer_provider(
-#     TracerProvider(id_generator=AwsXRayIdGenerator())
-# )
 otlp_exporter = OTLPSpanExporter(endpoint=xray_endpoint, insecure=True)
 trace.get_tracer_provider().add_span_processor(
     BatchSpanProcessor(otlp_exporter)
@@ -48,13 +44,6 @@ FastAPIInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
 BotocoreInstrumentor().instrument()
 HTTPXClientInstrumentor().instrument()
-
-# @app.middleware("http")
-# async def otel_middleware(request: Request, call_next):
-#     span_name = f"HTTP {request.method} {request.url.path}"
-#     with tracer.start_as_current_span(span_name):
-#         response = await call_next(request)
-#     return response
 
 @app.get("/health")
 async def health():
