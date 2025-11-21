@@ -48,6 +48,8 @@ jobs:
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         env: 
           TF_VAR_image_uri: this
+          TF_VAR_aws_otel_collector_image_uri: this
+          TF_VAR_debug_image_uri: this
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task
