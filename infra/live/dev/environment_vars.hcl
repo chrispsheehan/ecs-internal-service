@@ -2,7 +2,7 @@ locals {
   deploy_branches       = ["*"]
   wait_for_steady_state = false
   local_tunnel          = false
-  xray_enabled          = false
+  xray_enabled          = true
 }
 
 inputs = {
