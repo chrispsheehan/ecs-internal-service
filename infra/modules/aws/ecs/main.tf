@@ -29,7 +29,7 @@ resource "aws_vpc_endpoint" "interface_endpoints" {
   vpc_endpoint_type   = "Interface"
   security_group_ids  = [aws_security_group.vpc_endpoint.id]
   subnet_ids          = data.aws_subnets.private.ids
-  private_dns_enabled = true
+  private_dns_enabled = lookup(local.private_dns_overrides, each.key, true)
 }
 
 resource "aws_vpc_endpoint" "gateway_s3" {
