@@ -21,7 +21,6 @@ locals {
     local.xray_interface_endpoints
   )
 
-  # override Private DNS only when xray is enabled AND you explicitly turn its DNS off
   private_dns_overrides = {
     xray = false
   }
