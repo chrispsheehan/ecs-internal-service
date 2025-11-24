@@ -19,6 +19,10 @@ variable "local_tunnel" {
   default = false
 }
 
+variable "xray_enabled" {
+  type = bool
+}
+
 variable "wait_for_steady_state" {
   type    = bool
   default = true
