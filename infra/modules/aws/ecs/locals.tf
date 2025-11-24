@@ -12,7 +12,7 @@ locals {
   } : {}
 
   xray_interface_endpoints = var.xray_enabled ? {
-    ssmmessages = "xray"
+    xray = "xray"
   } : {}
 
   interface_endpoints = merge(
