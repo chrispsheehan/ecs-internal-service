@@ -138,7 +138,7 @@ jobs:
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task-caller
-          override_tg_vars: '[{"name": "DOWNSTREAM_URL", "value": "${{ needs.ecs-responder-svc.outputs.internal_dns }}"}]'
+          override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "${{ needs.ecs-responder-svc.outputs.internal_dns }}"}]}'
 
       - name: get task
         id: get-task
