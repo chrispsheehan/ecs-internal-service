@@ -94,6 +94,8 @@ jobs:
   ecs-responder-svc:
     needs: 
       - task-responder
+    outputs:
+      internal_dns: ${{ steps.get-vars.outputs.internal_dns }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -101,11 +103,19 @@ jobs:
           ref: ${{ inputs.infra_version }}
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: ecs-responder-svc
         env: 
           TF_VAR_task_definition_arn: ${{ needs.task-responder.outputs.task_definition_arn }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-responder-svc
+
+      - name: get vars
+        id: get-vars
+        env:
+          TG_OUTPUTS: ${{ steps.ecs-responder-svc.outputs.tg_outputs  }}
+        run: |
+          echo "internal_dns=$(echo $TG_OUTPUTS | jq -r '.internal_dns.value')" >> $GITHUB_OUTPUT
 
   task-caller:
     needs: ecs-responder-svc
@@ -127,7 +137,7 @@ jobs:
             [
               {
                 "name": "DOWNSTREAM_URL",
-                "value": "http://thiasinaosdinaosnd.com"
+                "value": ${{ needs.ecs-responder-svc.outputs.internal_dns }}
               }
             ]
         with:
