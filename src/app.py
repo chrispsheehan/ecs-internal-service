@@ -9,12 +9,10 @@ import httpx
 from opentelemetry import trace, propagate
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.semconv.resource import ResourceAttributes
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
 from opentelemetry.trace import SpanKind
-from opentelemetry.instrumentation.wsgi import collect_request_attributes  
 
 image = os.getenv("IMAGE", "NOT_FOUND")
 xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
@@ -23,7 +21,7 @@ service_name = os.getenv("AWS_SERVICE_NAME", "NOT_FOUND")
 app = FastAPI()
 s3_client = boto3.client('s3')
 
-resource = Resource.create({ResourceAttributes.SERVICE_NAME: service_name})
+resource = Resource.create({"service.name": service_name})
 trace.set_tracer_provider(
     TracerProvider(
         resource=resource,
@@ -42,11 +40,15 @@ PROPAGATOR = propagate.get_global_textmap()
 @app.middleware("http")
 async def otel_server_middleware(request: Request, call_next):
     # Extract parent context from incoming headers
-    ctx = PROPAGATOR.extract(request.headers.__getitem__)
+    ctx = PROPAGATOR.extract(request.headers)
 
-    # Attributes similar to what FastAPI/ASGI instrumentation would set
-    attributes = collect_request_attributes(request.scope)
-    attributes["http.route"] = request.url.path
+    attributes = {
+        "http.method": request.method,
+        "http.scheme": request.url.scheme,
+        "http.host": request.headers.get("host", ""),
+        "http.target": request.url.path,
+        "http.user_agent": request.headers.get("user-agent", "")
+    }
 
     with tracer.start_as_current_span(
         name=f"{request.method} {request.url.path}",
@@ -106,7 +108,7 @@ def requests_test():
         },
     ) as span:
         headers = {}
-        PROPAGATOR.inject(headers.__setitem__)
+        PROPAGATOR.inject(headers)
 
         response = requests.get(url, headers=headers)
 
@@ -134,7 +136,7 @@ async def httpx_test():
             },
         ) as span:
             headers = {}
-            PROPAGATOR.inject(headers.__setitem__)
+            PROPAGATOR.inject(headers)
 
             response = await client.get(url, headers=headers)
 
