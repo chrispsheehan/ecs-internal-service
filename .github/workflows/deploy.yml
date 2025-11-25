@@ -75,8 +75,25 @@ jobs:
         run: |
           echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
 
-  ecs:
+  cluster:
     needs: task
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_task_definition_arn: ${{ needs.task.outputs.task_definition_arn }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
+
+  ecs:
+    needs: 
+      - cluster
+      - task
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
