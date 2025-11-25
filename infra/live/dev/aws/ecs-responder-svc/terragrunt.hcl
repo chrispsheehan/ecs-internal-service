@@ -6,6 +6,10 @@ locals {
   service_name = "ecs-internal-responder-svc"
 }
 
+inputs = {
+  service_name = local.service_name
+}
+
 terraform {
   source = "../../../../modules//aws//ecs"
 }
