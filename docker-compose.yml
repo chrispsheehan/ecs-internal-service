@@ -15,25 +15,49 @@ services:
     networks:
       - tracing
 
-  app:
+  app-caller:
     build:
       context: .
       dockerfile: Dockerfile
-      target: app
-    container_name: fast-api-app
+      target: app-caller
+    container_name: app-caller
     env_file:
       - .env
     environment:
       AWS_XRAY_ENDPOINT: http://otel-collector:4317
-      AWS_SERVICE_NAME: local-fastapi-otel
-      IMAGE: docker-compose-image
+      AWS_SERVICE_NAME: app-caller
+      IMAGE: docker-compose-app-caller
+      DOWNSTREAM_URL: http://app-responder:3000
     volumes:
       - ./src:/usr/app/app
-    command: uvicorn app.app:app --host 0.0.0.0 --port 3000 --reload
+    command: uvicorn app.caller.app:app --host 0.0.0.0 --port 3000 --reload
+    depends_on:
+      - otel-collector
+      - app-responder
+    ports:
+      - "8000:3000"
+    networks:
+      - tracing
+
+  app-responder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app-responder
+    container_name: app-responder
+    env_file:
+      - .env
+    environment:
+      AWS_XRAY_ENDPOINT: http://otel-collector:4317
+      AWS_SERVICE_NAME: app-responder
+      IMAGE: docker-compose-app-responder
+    volumes:
+      - ./src:/usr/app/app
+    command: uvicorn app.responder.app:app --host 0.0.0.0 --port 3000 --reload
     depends_on:
       - otel-collector
     ports:
-      - "8000:3000"
+      - "8001:3000"
     networks:
       - tracing
 
@@ -44,7 +68,8 @@ services:
       target: debug
     container_name: debug-tool
     depends_on:
-      - app
+      - app-caller
+      - app-responder
     networks:
       - tracing
 
