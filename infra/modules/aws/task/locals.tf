@@ -68,7 +68,7 @@ locals {
     essential   = true
     environment = concat(local.shared_environment, var.additional_env_vars)
 
-    command = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "app.app:app"]
+    command = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "${var.python_app}"]
   }
 
   otel-collector = {

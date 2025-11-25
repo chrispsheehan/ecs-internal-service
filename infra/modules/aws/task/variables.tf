@@ -51,3 +51,7 @@ variable "additional_env_vars" {
   }))
   default = []
 }
+
+variable "python_app" {
+  type = string
+}

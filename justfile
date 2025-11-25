@@ -42,7 +42,7 @@ get-task-id:
     aws ecs list-tasks \
         --region eu-west-2 \
         --cluster "ecs-internal-service-cluster" \
-        --service-name "ecs-internal-service-service" \
+        --service-name "ecs-internal-caller-svc" \
         --desired-status RUNNING \
         --query 'taskArns[-1]' --output text
 
