@@ -9,7 +9,11 @@ on:
         description: "Version of infrastructure (terraform) to be deployed"
         required: true
         type: string
-      backend_image_uri:
+      app_responder_image_uri:
+        required: true
+        type: string
+        description: Image to be deployed to ECS
+      app_caller_image_uri:
         required: true
         type: string
         description: Image to be deployed to ECS
