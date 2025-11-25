@@ -1,5 +1,5 @@
 resource "aws_security_group" "ecs_service" {
-  name        = "${var.project_name}-ecs-sg"
+  name        = "${var.service_name}-ecs-sg"
   description = "ECS service private access only"
   vpc_id      = data.aws_vpc.this.id
 
@@ -22,7 +22,7 @@ resource "aws_security_group" "ecs_service" {
 }
 
 resource "aws_ecs_service" "service" {
-  name            = "${var.project_name}-service"
+  name            = var.service_name
   cluster         = data.aws_ecs_cluster.main.id
   task_definition = var.task_definition_arn
   desired_count   = 1
