@@ -1,6 +1,6 @@
 locals {
-  cloudwatch_log_name          = "/ecs/${var.project_name}"
-  cloudwatch_otel_log_name     = "/ecs/${var.project_name}/otel"
+  cloudwatch_log_name          = "/ecs/${var.service_name}"
+  cloudwatch_otel_log_name     = "/ecs/${var.service_name}/otel"
   image_uri                    = var.image_uri
   aws_otel_collector_image_uri = var.aws_otel_collector_image_uri
   debug_image_uri              = var.debug_image_uri
@@ -13,6 +13,10 @@ locals {
     {
       name  = "AWS_SDK_LOAD_CONFIG"
       value = "1"
+    },
+    {
+      name  = "AWS_SERVICE_NAME"
+      value = "${var.service_name}"
     }
   ]
 
@@ -30,13 +34,13 @@ locals {
   )
 
   api-container = {
-    name        = var.project_name
+    name        = var.service_name
     networkMode = "awsvpc"
     image       = local.image_uri
 
     portMappings = [
       {
-        name          = "${var.project_name}-${var.container_port}-tcp"
+        name          = "${var.service_name}-${var.container_port}-tcp"
         containerPort = var.container_port
         hostPort      = var.container_port
         protocol      = "tcp"
@@ -69,12 +73,12 @@ locals {
   }
 
   otel-collector = {
-    name  = "${var.project_name}-otel-collector"
+    name  = "${var.service_name}-otel-collector"
     image = local.aws_otel_collector_image_uri
 
     portMappings = [
       {
-        name          = "${var.project_name}-otel-collector-${var.container_port}-tcp"
+        name          = "${var.service_name}-otel-collector-${var.container_port}-tcp"
         containerPort = 4317
         hostPort      = 4317
         protocol      = "tcp"
@@ -98,7 +102,7 @@ locals {
   }
 
   debug-container = {
-    name  = "${var.project_name}-debug"
+    name  = "${var.service_name}-debug"
     image = local.debug_image_uri
 
     command = ["sleep", "infinity"]
