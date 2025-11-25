@@ -7,7 +7,8 @@ locals {
     "ecs:*",
     "ec2:*",
     "logs:*",
-    "cloudwatch:*"
+    "cloudwatch:*",
+    "elasticloadbalancing:*"
   ]
   container_port = 3000
 }
