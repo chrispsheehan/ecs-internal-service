@@ -17,6 +17,14 @@ locals {
     {
       name  = "AWS_SERVICE_NAME"
       value = "${var.service_name}"
+    },
+    {
+      name  = "IMAGE"
+      value = "${local.image_uri}"
+    },
+    {
+      name  = "AWS_XRAY_ENDPOINT"
+      value = "http://localhost:4317"
     }
   ]
 
@@ -58,16 +66,7 @@ locals {
     }
 
     essential = true
-    environment = concat(local.shared_environment, [
-      {
-        name  = "IMAGE"
-        value = "${local.image_uri}"
-      },
-      {
-        name  = "AWS_XRAY_ENDPOINT"
-        value = "http://localhost:4317"
-      }
-    ])
+    environment = concat(local.shared_environment, var.additional_env_vars)
 
     command = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "app.app:app"]
   }

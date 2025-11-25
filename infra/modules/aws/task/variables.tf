@@ -43,3 +43,11 @@ variable "local_tunnel" {
 variable "xray_enabled" {
   type = bool
 }
+
+variable "additional_env_vars" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
