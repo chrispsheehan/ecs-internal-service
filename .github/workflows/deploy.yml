@@ -51,8 +51,6 @@ jobs:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/oidc
 
-
-
   task-responder:
     needs: setup
     runs-on: ubuntu-latest
@@ -82,8 +80,7 @@ jobs:
 
   cluster:
     needs:
-      - task-caller
-      - task-responder
+      - setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +93,8 @@ jobs:
           tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
 
   ecs-responder-svc:
-    needs: 
+    needs:
+      - cluster
       - task-responder
     outputs:
       internal_dns: ${{ steps.get-vars.outputs.internal_dns }}
@@ -156,7 +154,8 @@ jobs:
           echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
 
   ecs-caller-svc:
-    needs: 
+    needs:
+      - cluster
       - task-caller
     runs-on: ubuntu-latest
     steps:
