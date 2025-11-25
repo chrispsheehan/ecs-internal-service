@@ -3,7 +3,7 @@ include {
 }
 
 locals {
-  service_name   = "ecs-internal-caller-svc"
+  service_name = "ecs-internal-caller-svc"
 }
 
 inputs = {
