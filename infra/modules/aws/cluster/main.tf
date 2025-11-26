@@ -40,8 +40,8 @@ resource "aws_vpc_endpoint" "gateway_s3" {
 }
 
 resource "aws_eip" "nat_eip" {
-  count = length(data.aws_subnets.public.ids)
-  domain   = "vpc"
+  count  = length(data.aws_subnets.public.ids)
+  domain = "vpc"
 }
 
 resource "aws_nat_gateway" "nat" {

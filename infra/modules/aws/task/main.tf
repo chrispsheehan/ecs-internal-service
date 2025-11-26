@@ -19,7 +19,6 @@ resource "aws_iam_policy" "ssm_messages_policy" {
   policy = data.aws_iam_policy_document.ssm_messages.json
 }
 
-
 resource "aws_iam_role_policy_attachment" "logs_access_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.logs_access_policy.arn
@@ -58,9 +57,19 @@ resource "aws_iam_policy" "xray_put_policy" {
   policy = data.aws_iam_policy_document.xray_put.json
 }
 
+resource "aws_iam_policy" "s3_list_policy" {
+  name   = "${var.service_name}-s3-list-policy"
+  policy = data.aws_iam_policy_document.s3_list.json
+}
+
 resource "aws_iam_role_policy_attachment" "xray_put_policy_attachment" {
   role       = aws_iam_role.ecs_task_role.name
   policy_arn = aws_iam_policy.xray_put_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "s3_list_policy_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.s3_list_policy.arn
 }
 
 resource "aws_ecs_task_definition" "task" {
