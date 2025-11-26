@@ -38,3 +38,21 @@ resource "aws_vpc_endpoint" "gateway_s3" {
   vpc_endpoint_type = "Gateway"
   route_table_ids   = data.aws_route_tables.subnet_route_tables.ids
 }
+
+resource "aws_eip" "nat_eip" {
+  count = length(data.aws_subnets.public.ids)
+  domain   = "vpc"
+}
+
+resource "aws_nat_gateway" "nat" {
+  count         = length(data.aws_subnets.public.ids)
+  allocation_id = aws_eip.nat_eip[count.index].id
+  subnet_id     = data.aws_subnets.public.ids[count.index]
+}
+
+resource "aws_route" "private_nat_route" {
+  count                  = length(data.aws_route_tables.subnet_route_tables.ids)
+  route_table_id         = data.aws_route_tables.subnet_route_tables.ids[count.index]
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat[count.index].id
+}

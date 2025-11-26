@@ -17,6 +17,18 @@ data "aws_subnets" "private" {
   }
 }
 
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*public*"]
+  }
+}
+
 data "aws_route_tables" "subnet_route_tables" {
   filter {
     name   = "association.subnet-id"
