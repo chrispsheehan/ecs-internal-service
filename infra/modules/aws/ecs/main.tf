@@ -95,6 +95,12 @@ resource "aws_ecs_service" "service" {
     security_groups  = [aws_security_group.ecs_service.id]
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs.arn
+    container_name   = var.service_name
+    container_port   = var.container_port
+  }
+
   enable_execute_command = var.local_tunnel ? true : false
   wait_for_steady_state  = var.wait_for_steady_state
 }
