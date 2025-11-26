@@ -37,23 +37,23 @@ tg-all op:
     cd {{justfile_directory()}}/infra/live 
     terragrunt run-all {{op}}
 
-get-task-id:
+get-task-id svc:
     #!/usr/bin/env bash
     aws ecs list-tasks \
         --region eu-west-2 \
         --cluster "ecs-internal-service-cluster" \
-        --service-name "ecs-internal-caller-svc" \
+        --service-name "ecs-internal-{{svc}}-svc" \
         --desired-status RUNNING \
         --query 'taskArns[-1]' --output text
 
-local-connect:
+local-connect svc:
     #!/usr/bin/env bash
-    TASK_ID=$(just get-task-id)
+    TASK_ID=$(just get-task-id {{svc}})
     aws ecs execute-command \
         --region eu-west-2 \
         --cluster "ecs-internal-service-cluster" \
         --task "$TASK_ID" \
-        --container "ecs-internal-caller-svc-debug" \
+        --container "ecs-internal-{{svc}}-svc-debug" \
         --interactive \
         --command "/bin/sh"
 
