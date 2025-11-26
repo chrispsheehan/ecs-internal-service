@@ -100,7 +100,7 @@ def requests_test():
     url = "https://example.com"
 
     with tracer.start_as_current_span(
-        "HTTP GET",
+        "HTTP GET /requests-test",
         kind=SpanKind.CLIENT,
         attributes={
             "http.method": "GET",
@@ -128,7 +128,7 @@ async def httpx_test():
 
     async with httpx.AsyncClient() as client:
         with tracer.start_as_current_span(
-            "HTTP GET",
+            "HTTP GET /httpx-test",
             kind=SpanKind.CLIENT,
             attributes={
                 "http.method": "GET",
