@@ -23,23 +23,32 @@ env:
   AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
 
 jobs:
-  ecs:
+  ecs-caller-svc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.infra_version }}
-
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         env: 
           TF_VAR_task_definition_arn: "blah"
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-          tg_directory: infra/live/${{ inputs.environment }}/aws/ecs
+          tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-caller-svc
           tg_action: destroy
 
-  task:
-    needs: ecs
+  ecs-responder-svc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_task_definition_arn: "blah"
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-responder-svc
+          tg_action: destroy
+
+  task-caller:
+    needs: ecs-caller-svc
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,11 +61,30 @@ jobs:
           TF_VAR_debug_image_uri: this
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-          tg_directory: infra/live/${{ inputs.environment }}/aws/task
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task-caller
+          tg_action: destroy
+
+  task-responder:
+    needs: ecs-responder-svc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Destroy ecrs
+        uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_image_uri: this
+          TF_VAR_aws_otel_collector_image_uri: this
+          TF_VAR_debug_image_uri: this
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task-responder
           tg_action: destroy
 
   ecr:
-    needs: task
+    needs:
+      - task-caller
+      - task-responder
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,4 +94,20 @@ jobs:
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/ecr
+          tg_action: destroy
+
+  cluster:
+    needs:
+      - ecs-caller-svc
+      - ecs-responder-svc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
           tg_action: destroy

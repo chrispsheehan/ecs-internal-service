@@ -1,24 +1,23 @@
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "${var.project_name}-ecs-task-execution-role"
+  name               = "${var.service_name}-ecs-task-execution-role"
   description        = "Role used to pull from ECR and setup Cloudwatch logging access"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_iam_policy" "logs_access_policy" {
-  name   = "${var.project_name}-logs-access-policy"
+  name   = "${var.service_name}-logs-access-policy"
   policy = data.aws_iam_policy_document.logs_policy.json
 }
 
 resource "aws_iam_policy" "ecr_access_policy" {
-  name   = "${var.project_name}-ecr-access-policy"
+  name   = "${var.service_name}-ecr-access-policy"
   policy = data.aws_iam_policy_document.ecr_policy.json
 }
 
 resource "aws_iam_policy" "ssm_messages_policy" {
-  name   = "${var.project_name}-ssm-messages-policy"
+  name   = "${var.service_name}-ssm-messages-policy"
   policy = data.aws_iam_policy_document.ssm_messages.json
 }
-
 
 resource "aws_iam_role_policy_attachment" "logs_access_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
@@ -48,14 +47,19 @@ resource "aws_cloudwatch_log_group" "ecs_otel_log_group" {
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name               = "${var.project_name}-ecs-task-role"
+  name               = "${var.service_name}-ecs-task-role"
   description        = "Role used to give the task runtime access"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_iam_policy" "xray_put_policy" {
-  name   = "${var.project_name}-xray-put-policy"
+  name   = "${var.service_name}-xray-put-policy"
   policy = data.aws_iam_policy_document.xray_put.json
+}
+
+resource "aws_iam_policy" "s3_list_policy" {
+  name   = "${var.service_name}-s3-list-policy"
+  policy = data.aws_iam_policy_document.s3_list.json
 }
 
 resource "aws_iam_role_policy_attachment" "xray_put_policy_attachment" {
@@ -63,8 +67,13 @@ resource "aws_iam_role_policy_attachment" "xray_put_policy_attachment" {
   policy_arn = aws_iam_policy.xray_put_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "s3_list_policy_attachment" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = aws_iam_policy.s3_list_policy.arn
+}
+
 resource "aws_ecs_task_definition" "task" {
-  family                   = "${var.project_name}-task"
+  family                   = "${var.service_name}-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu

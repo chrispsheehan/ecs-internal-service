@@ -20,8 +20,4 @@ locals {
     local.tunnel_interface_endpoints,
     local.xray_interface_endpoints
   )
-
-  private_dns_overrides = {
-    xray = false
-  }
 }

@@ -17,9 +17,6 @@ data "aws_subnets" "private" {
   }
 }
 
-data "aws_route_tables" "subnet_route_tables" {
-  filter {
-    name   = "association.subnet-id"
-    values = data.aws_subnets.private.ids
-  }
+data "aws_ecs_cluster" "main" {
+  cluster_name = "${var.project_name}-cluster"
 }

@@ -16,12 +16,12 @@ from opentelemetry.trace import SpanKind
 
 image = os.getenv("IMAGE", "NOT_FOUND")
 xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
-service_name = os.getenv("AWS_SERVICE_NAME", "NOT_FOUND")
+SERVICE_NAME   = os.getenv("AWS_SERVICE_NAME", "responder-service")
 
 app = FastAPI()
 s3_client = boto3.client('s3')
 
-resource = Resource.create({"service.name": service_name})
+resource = Resource.create({"service.name": SERVICE_NAME})
 trace.set_tracer_provider(
     TracerProvider(
         resource=resource,
@@ -63,7 +63,7 @@ async def otel_server_middleware(request: Request, call_next):
 
 @app.get("/health")
 async def health():
-    return {"msg": "Hello, this is your API"}
+    return {"msg": f"{SERVICE_NAME}  ok"}
 
 
 @app.get("/host")

@@ -10,8 +10,10 @@ on:
         required: true
         type: string
     outputs:
-      backend_image_uri:
-        value: ${{ jobs.backend.outputs.image_uri }}
+      app_responder_image_uri:
+        value: ${{ jobs.app-responder.outputs.image_uri }}
+      app_caller_image_uri:
+        value: ${{ jobs.app-responder.outputs.image_uri }}
       aws_otel_collector_image_uri: 
         value: ${{ jobs.aws-otel-collector.outputs.image_uri }}
       debug_image_uri: 
@@ -49,7 +51,7 @@ jobs:
         run: |
           echo "ecr_repo_name=$(echo $TG_OUTPUTS | jq -r '.ecr_repo_name.value')" >> $GITHUB_OUTPUT
 
-  backend:
+  app-caller:
     needs: ecr
     runs-on: ubuntu-latest
     outputs:
@@ -67,7 +69,31 @@ jobs:
           ecr_repository_name: ${{ needs.ecr.outputs.ecr_repo_name }}
           version: ${{ env.version }}
           push-role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN }}
-          target: app
+          target: app-caller
+
+      - id: set_uri
+        run: |
+          echo "IMAGE_URI=${{ env.IMAGE_URI }}" >> $GITHUB_OUTPUT
+
+  app-responder:
+    needs: ecr
+    runs-on: ubuntu-latest
+    outputs:
+      image_uri: ${{ steps.set_uri.outputs.IMAGE_URI }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and push image
+        id: build-image
+        uses: ./.github/actions/build_image
+        with:
+          aws_account_id: ${{ env.AWS_ACCOUNT_ID }}
+          aws_region: ${{ env.AWS_REGION }}
+          ecr_repository_name: ${{ needs.ecr.outputs.ecr_repo_name }}
+          version: ${{ env.version }}
+          push-role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN }}
+          target: app-responder
 
       - id: set_uri
         run: |

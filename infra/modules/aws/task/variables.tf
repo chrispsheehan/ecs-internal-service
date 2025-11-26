@@ -2,6 +2,10 @@ variable "project_name" {
   type = string
 }
 
+variable "service_name" {
+  type = string
+}
+
 variable "aws_region" {
   type = string
 }
@@ -38,4 +42,16 @@ variable "local_tunnel" {
 
 variable "xray_enabled" {
   type = bool
+}
+
+variable "additional_env_vars" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+variable "python_app" {
+  type = string
 }
