@@ -20,10 +20,10 @@ module "load_balancer" {
 module "api_vpc_link" {
   source = "./api_vpc_link"
 
-  service_name           = var.service_name
-  security_group_id      = module.security.vpc_link_sg
-  load_balancer_dns_name = module.load_balancer.dns_name
-  private_subnet_ids     = data.aws_subnets.private.ids
+  service_name               = var.service_name
+  security_group_id          = module.security.vpc_link_sg
+  load_balancer_listener_arn = module.load_balancer.listener_arn
+  private_subnet_ids         = data.aws_subnets.private.ids
 }
 
 module "ecs" {
