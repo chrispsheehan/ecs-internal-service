@@ -17,6 +17,8 @@ resource "aws_apigatewayv2_integration" "http_integration" {
   connection_type        = "VPC_LINK"
   connection_id          = aws_apigatewayv2_vpc_link.vpc_link.id
   payload_format_version = "1.0"
+  # CRITICAL: Disables auto-scaling & CodeDeploy
+  passthrough_behavior = "WHEN_NO_MATCH"
 }
 
 resource "aws_apigatewayv2_route" "default_route" {

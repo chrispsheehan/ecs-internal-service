@@ -19,11 +19,6 @@ resource "aws_iam_policy" "ssm_messages_policy" {
   policy = data.aws_iam_policy_document.ssm_messages.json
 }
 
-resource "aws_iam_policy" "lb_validation_policy" {
-  name   = "${var.service_name}-lb_validation-policy"
-  policy = data.aws_iam_policy_document.lb_validation.json
-}
-
 resource "aws_iam_role_policy_attachment" "logs_access_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.logs_access_policy.arn
@@ -32,11 +27,6 @@ resource "aws_iam_role_policy_attachment" "logs_access_policy_attachment" {
 resource "aws_iam_role_policy_attachment" "ecr_access_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.ecr_access_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "lb_validation_policy_attachment" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = aws_iam_policy.lb_validation_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_messages_policy_attachment" {
