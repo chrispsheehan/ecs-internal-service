@@ -21,7 +21,7 @@ module "api_vpc_link" {
   source = "./api_vpc_link"
 
   security_group_id  = module.security.vpc_link_sg
-  load_balancer_name = module.load_balancer.load_balancer_name
+  load_balancer_name = module.load_balancer.name
   private_subnet_ids = data.aws_subnets.private.ids
 }
 

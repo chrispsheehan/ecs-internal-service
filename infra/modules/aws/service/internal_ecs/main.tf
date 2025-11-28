@@ -1,6 +1,6 @@
 resource "aws_ecs_service" "service" {
   name            = var.service_name
-  cluster         = data.aws_ecs_cluster.main.id
+  cluster         = data.aws_ecs_cluster.this.id
   task_definition = var.task_definition_arn
   desired_count   = var.desired_task_count
   launch_type     = "FARGATE"

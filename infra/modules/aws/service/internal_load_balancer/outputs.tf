@@ -1,4 +1,4 @@
-output "dns_nam" {
+output "dns_name" {
   value = aws_lb.internal.dns_name
 }
 
