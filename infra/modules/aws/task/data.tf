@@ -95,3 +95,14 @@ data "aws_iam_policy_document" "s3_list" {
     resources = ["*"]
   }
 }
+
+data "aws_iam_policy_document" "lb_validation" {
+  statement {
+    actions = [
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetHealth"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+}
