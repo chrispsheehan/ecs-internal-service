@@ -1,18 +1,18 @@
 resource "aws_apigatewayv2_vpc_link" "vpc_link" {
-  name               = "${var.load_balancer_name}-vpc-link"
+  name               = "${var.service_name}-vpc-link"
   subnet_ids         = var.private_subnet_ids
   security_group_ids = [var.security_group_id]
 }
 
 resource "aws_apigatewayv2_api" "http_api" {
-  name          = "${var.load_balancer_name}-http-api"
+  name          = "${var.service_name}-http-api"
   protocol_type = "HTTP"
 }
 
 resource "aws_apigatewayv2_integration" "http_integration" {
   api_id                 = aws_apigatewayv2_api.http_api.id
   integration_type       = "HTTP_PROXY"
-  integration_uri        = "http://${data.aws_lb.this.dns_name}"
+  integration_uri        = "http://${var.load_balancer_dns_name}"
   integration_method     = "ANY"
   connection_type        = "VPC_LINK"
   connection_id          = aws_apigatewayv2_vpc_link.vpc_link.id
