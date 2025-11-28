@@ -1,4 +1,4 @@
-variable "project_name" {
+variable "cluster_name" {
   type = string
 }
 
@@ -6,8 +6,22 @@ variable "service_name" {
   type = string
 }
 
-variable "aws_region" {
-  type = string
+variable "desired_task_count" {
+  type    = number
+  default = 1
+}
+
+variable "load_balancers" {
+  type = list(object({
+    target_group_arn = string
+    container_name   = string
+    container_port   = number
+  }))
+  default = []
+}
+
+variable "private_subnet_ids" {
+  type = list(string)
 }
 
 variable "container_port" {

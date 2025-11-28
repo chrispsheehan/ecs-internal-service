@@ -4,7 +4,7 @@ resource "aws_lb" "internal" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
 
-  subnets = data.aws_subnets.private.ids
+  subnets = var.private_subnet_ids
 }
 
 resource "aws_lb_target_group" "ecs" {
@@ -12,7 +12,7 @@ resource "aws_lb_target_group" "ecs" {
   port        = var.container_port
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = data.aws_vpc.this.id
+  vpc_id      = var.vpc_id
 
   health_check {
     path                = "/health"
