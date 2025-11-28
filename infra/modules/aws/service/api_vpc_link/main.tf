@@ -1,8 +1,8 @@
 resource "aws_api_gateway_v2_vpc_link" "vpc_link" {
   name               = "${var.load_balancer_name}-vpc-link"
   subnet_ids         = var.private_subnet_ids
-  security_group_ids = []
-  description        = "VPC Link for internal ALB"
+  security_group_ids = [var.security_group_id]
+  description        = "VPC Link for ${var.load_balancer_name} internal ALB"
 }
 
 resource "aws_api_gateway_v2_api" "http_api" {

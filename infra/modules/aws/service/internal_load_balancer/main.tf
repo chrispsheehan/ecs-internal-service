@@ -2,7 +2,7 @@ resource "aws_lb" "internal" {
   name               = "${var.service_name}-alb"
   internal           = true
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb.id]
+  security_groups    = [var.security_group_id]
 
   subnets = var.private_subnet_ids
 }

@@ -6,6 +6,15 @@ variable "service_name" {
   type = string
 }
 
+variable "container_port" {
+  type    = number
+  default = 3000
+}
+
+variable "task_definition_arn" {
+  type = string
+}
+
 variable "connection_type" {
   description = "Type of connectivity/integration to use for the service (choices: internal, internal_dns, vpc_link)."
   type        = string
@@ -16,29 +25,17 @@ variable "connection_type" {
   }
 }
 
-variable "private_subnet_ids" {
-  type = list(string)
-}
-
-variable "container_port" {
-  type = number
-}
-
-variable "task_definition_arn" {
-  type = string
-}
-
 variable "local_tunnel" {
   type    = bool
   default = false
 }
 
 variable "xray_enabled" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "wait_for_steady_state" {
   type    = bool
-  default = true
+  default = false
 }
