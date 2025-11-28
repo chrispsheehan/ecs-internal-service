@@ -22,7 +22,7 @@ resource "aws_apigatewayv2_integration" "http_integration" {
 resource "aws_apigatewayv2_route" "default_route" {
   api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "ANY /{proxy+}"
-  target    = "integrations/${aws_api_gateway_v2_integration.http_integration.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
 }
 
 resource "aws_apigatewayv2_stage" "default_stage" {
