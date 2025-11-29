@@ -1,3 +1,7 @@
+resource "aws_iam_service_linked_role" "ecs" {
+  aws_service_name = "ecs.amazonaws.com"
+}
+
 resource "aws_ecs_service" "service" {
   name            = var.service_name
   cluster         = data.aws_ecs_cluster.this.id
@@ -32,4 +36,6 @@ resource "aws_ecs_service" "service" {
   deployment_controller {
     type = "ECS"
   }
+
+  depends_on = [ aws_iam_service_linked_role.ecs ]
 }
