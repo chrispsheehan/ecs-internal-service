@@ -40,7 +40,7 @@ module "ecs" {
   local_tunnel = var.local_tunnel
 
   load_balancers = [{
-    target_group_arn = module.load_balancer.listener_arn
+    target_group_arn = module.load_balancer.target_group_arn_arn
     container_name   = var.service_name
     container_port   = var.container_port
   }]
