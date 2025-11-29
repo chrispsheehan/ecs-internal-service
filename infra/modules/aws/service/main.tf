@@ -22,7 +22,7 @@ module "api_vpc_link" {
 
   service_name               = var.service_name
   security_group_id          = module.security.vpc_link_sg
-  load_balancer_listener_arn = module.load_balancer.listener_arn
+  load_balancer_listener_arn = module.load_balancer.target_group_arn
   private_subnet_ids         = data.aws_subnets.private.ids
 }
 
