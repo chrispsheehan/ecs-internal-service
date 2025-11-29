@@ -3,11 +3,11 @@ resource "aws_security_group" "vpc_link_sg" {
   vpc_id      = var.vpc_id
 
   egress {
-    description     = "VPC Link to ALB/NLB"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = [aws_security_group.lb_sg.id]
+    description = "VPC Link to NLB"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -17,11 +17,11 @@ resource "aws_security_group" "lb_sg" {
   description = "Security group for internal ALB/NLB accessible via VPC Link"
 
   ingress {
-    description = "API Gateway VPC Link"
-    from_port   = 80 # or your ALB listener port
-    to_port     = 80
-    protocol    = "tcp"
-    self        = true # VPC Link ENIs use same VPC
+    description     = "API Gateway VPC Link"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.vpc_link_sg.id]
   }
 
   egress {
