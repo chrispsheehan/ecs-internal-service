@@ -21,6 +21,8 @@ resource "aws_ecs_service" "service" {
   desired_count   = var.desired_task_count
   launch_type     = "FARGATE"
 
+  iam_role = aws_iam_role.ecs_service_role.arn
+
   network_configuration {
     subnets          = var.private_subnet_ids
     assign_public_ip = false
@@ -48,6 +50,4 @@ resource "aws_ecs_service" "service" {
   deployment_controller {
     type = "ECS"
   }
-
-  depends_on = [aws_iam_service_linked_role.ecs]
 }
