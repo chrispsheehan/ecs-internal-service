@@ -1,5 +1,17 @@
-resource "aws_iam_service_linked_role" "ecs" {
-  aws_service_name = "ecs.amazonaws.com"
+resource "aws_iam_role" "ecs_service_role" {
+  name               = "${var.service_name}-ecs-service-role"
+  description        = "Role used by ECS service for load balancer management"
+  assume_role_policy = data.aws_iam_policy_document.ecs_service_assume_role.json
+}
+
+resource "aws_iam_policy" "ecs_service_policy" {
+  name   = "${var.service_name}-ecs-service-policy"
+  policy = data.aws_iam_policy_document.ecs_service_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_service_policy_attachment" {
+  role       = aws_iam_role.ecs_service_role.name
+  policy_arn = aws_iam_policy.ecs_service_policy.arn
 }
 
 resource "aws_ecs_service" "service" {
@@ -37,5 +49,5 @@ resource "aws_ecs_service" "service" {
     type = "ECS"
   }
 
-  depends_on = [ aws_iam_service_linked_role.ecs ]
+  depends_on = [aws_iam_service_linked_role.ecs]
 }
