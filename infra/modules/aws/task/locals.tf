@@ -11,10 +11,6 @@ locals {
       value = "${var.aws_region}"
     },
     {
-      name  = "AWS_SDK_LOAD_CONFIG"
-      value = "1"
-    },
-    {
       name  = "AWS_SERVICE_NAME"
       value = "${var.service_name}"
     },
@@ -25,7 +21,22 @@ locals {
     {
       name  = "AWS_XRAY_ENDPOINT"
       value = "http://localhost:4317"
-    }
+    },
+  ]
+
+  otel_environment = [
+    {
+      name  = "AWS_REGION"
+      value = "${var.aws_region}"
+    },
+    {
+      name  = "OTEL_SAMPLING_PERCENTAGE"
+      value = tostring(var.otel_sampling_percentage)
+    },
+    {
+      name  = "OTEL_ENDPOINT"
+      value = "0.0.0.0:4317"
+    },
   ]
 
   base_containers = [
@@ -97,7 +108,7 @@ locals {
     command = ["--config", "/opt/aws/aws-otel-collector/etc/collector-config.yaml"]
 
     essential   = false
-    environment = local.shared_environment
+    environment = local.otel_environment
   }
 
   debug-container = {

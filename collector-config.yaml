@@ -2,14 +2,20 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: 0.0.0.0:4317
+        endpoint: ${OTEL_ENDPOINT}
 
 exporters:
   awsxray:
-    region: eu-west-2
+    region: ${AWS_REGION}
+
+processors:
+  probabilistic_sampler:
+    hash_seed: 22
+    sampling_percentage: ${OTEL_SAMPLING_PERCENTAGE}
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
+      processors: [probabilistic_sampler]
       exporters: [awsxray]
