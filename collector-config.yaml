@@ -8,8 +8,14 @@ exporters:
   awsxray:
     region: eu-west-2
 
+processors:
+  probabilistic_sampler:
+    hash_seed: 22
+    sampling_percentage: ${OTEL_SAMPLING_PERCENTAGE}
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
+      processors: [probabilistic_sampler]
       exporters: [awsxray]

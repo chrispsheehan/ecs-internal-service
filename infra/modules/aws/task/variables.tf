@@ -32,6 +32,12 @@ variable "aws_otel_collector_image_uri" {
   type = string
 }
 
+variable "otel_sampling_percentage" {
+  description = "Percentage of requests to send to x-ray"
+  type = string
+  default = 10.0
+}
+
 variable "debug_image_uri" {
   type = string
 }

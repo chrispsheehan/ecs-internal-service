@@ -3,6 +3,7 @@ locals {
   wait_for_steady_state = false
   local_tunnel          = true
   xray_enabled          = true
+  otel_sampling_percentage = 100.0
 }
 
 inputs = {
@@ -10,4 +11,5 @@ inputs = {
   wait_for_steady_state = local.wait_for_steady_state
   local_tunnel          = local.local_tunnel
   xray_enabled          = local.xray_enabled
+  otel_sampling_percentage = local.otel_sampling_percentage
 }

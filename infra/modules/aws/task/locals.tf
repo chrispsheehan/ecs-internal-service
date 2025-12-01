@@ -11,10 +11,6 @@ locals {
       value = "${var.aws_region}"
     },
     {
-      name  = "AWS_SDK_LOAD_CONFIG"
-      value = "1"
-    },
-    {
       name  = "AWS_SERVICE_NAME"
       value = "${var.service_name}"
     },
@@ -25,6 +21,10 @@ locals {
     {
       name  = "AWS_XRAY_ENDPOINT"
       value = "http://localhost:4317"
+    },
+    {
+      name  = "OTEL_SAMPLING_PERCENTAGE"
+      value = tostring(var.otel_sampling_percentage)
     }
   ]
 
