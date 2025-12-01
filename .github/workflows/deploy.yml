@@ -82,15 +82,25 @@ jobs:
     needs:
       - setup
     runs-on: ubuntu-latest
+    outputs:
+      cluster_name: ${{ steps.get-cluster.outputs.cluster_name }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.infra_version }}
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: cluster
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
+
+      - name: get cluster
+        id: get-cluster
+        env:
+          TG_OUTPUTS: ${{ steps.cluster.outputs.tg_outputs  }}
+        run: |
+          echo "cluster_name=$(echo $TG_OUTPUTS | jq -r '.cluster_name.value')" >> $GITHUB_OUTPUT
 
   ecs-responder-svc:
     needs:
@@ -106,7 +116,8 @@ jobs:
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         id: ecs-responder-svc
-        env: 
+        env:
+          TF_VAR_cluster_name: ${{ needs.cluster.outputs.cluster_name }}
           TF_VAR_task_definition_arn: ${{ needs.task-responder.outputs.task_definition_arn }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
@@ -160,6 +171,7 @@ jobs:
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         env: 
           TF_VAR_task_definition_arn: ${{ needs.task-caller.outputs.task_definition_arn }}
+          TF_VAR_cluster_name: ${{ needs.cluster.outputs.cluster_name }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-caller-svc

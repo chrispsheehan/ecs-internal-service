@@ -29,7 +29,7 @@ locals {
   ]
 
   base_containers = [
-    local.api-container
+    local.svc-container
   ]
 
   debug_sidecar = var.local_tunnel ? [local.debug-container] : []
@@ -41,7 +41,7 @@ locals {
     local.xray_sidecar
   )
 
-  api-container = {
+  svc-container = {
     name        = var.service_name
     networkMode = "awsvpc"
     image       = local.image_uri

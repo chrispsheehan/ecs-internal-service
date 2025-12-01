@@ -16,7 +16,3 @@ data "aws_subnets" "private" {
     values = ["*private*"]
   }
 }
-
-data "aws_ecs_cluster" "main" {
-  cluster_name = "${var.project_name}-cluster"
-}

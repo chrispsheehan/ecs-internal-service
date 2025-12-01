@@ -1,6 +1,6 @@
 locals {
   deploy_branches       = ["*"]
-  wait_for_steady_state = true
+  wait_for_steady_state = false
   local_tunnel          = true
   xray_enabled          = true
 }

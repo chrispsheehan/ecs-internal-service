@@ -11,5 +11,5 @@ inputs = {
 }
 
 terraform {
-  source = "../../../../modules//aws//ecs"
+  source = "../../../../modules//aws//service"
 }
