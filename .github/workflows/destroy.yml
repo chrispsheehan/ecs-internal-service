@@ -52,7 +52,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Destroy ecrs
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         env: 
@@ -69,7 +68,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Destroy ecrs
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         env: 
@@ -88,7 +86,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Destroy ecrs
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         with:
@@ -103,11 +100,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.infra_version }}
-
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
+          tg_action: destroy
+
+  network:
+    needs:
+      - ecs-caller-svc
+      - ecs-responder-svc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/network
           tg_action: destroy

@@ -125,6 +125,7 @@ jobs:
   ecs-responder-svc:
     needs:
       - cluster
+      - network
       - task-responder
     outputs:
       internal_dns: ${{ steps.get-vars.outputs.internal_dns }}
@@ -181,6 +182,7 @@ jobs:
   ecs-caller-svc:
     needs:
       - cluster
+      - network
       - task-caller
     runs-on: ubuntu-latest
     steps:
