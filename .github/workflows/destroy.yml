@@ -20,6 +20,7 @@ permissions:
 
 env:
   TF_VAR_lambda_version: this
+  TF_VAR_cluster_name: ecs-internal-service-cluster
   AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
 
 jobs:
