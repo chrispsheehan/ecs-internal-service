@@ -56,6 +56,45 @@ jobs:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/security
 
+  cluster:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    outputs:
+      cluster_name: ${{ steps.get-cluster.outputs.cluster_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: cluster
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
+
+      - name: get cluster
+        id: get-cluster
+        env:
+          TG_OUTPUTS: ${{ steps.cluster.outputs.tg_outputs  }}
+        run: |
+          echo "cluster_name=$(echo $TG_OUTPUTS | jq -r '.cluster_name.value')" >> $GITHUB_OUTPUT
+
+  network:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: cluster
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/network
+
   task-responder:
     needs: setup
     runs-on: ubuntu-latest
@@ -82,30 +121,6 @@ jobs:
           TG_OUTPUTS: ${{ steps.task.outputs.tg_outputs  }}
         run: |
           echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
-
-  cluster:
-    needs:
-      - setup
-    runs-on: ubuntu-latest
-    outputs:
-      cluster_name: ${{ steps.get-cluster.outputs.cluster_name }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.infra_version }}
-
-      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-        id: cluster
-        with:
-          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-          tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
-
-      - name: get cluster
-        id: get-cluster
-        env:
-          TG_OUTPUTS: ${{ steps.cluster.outputs.tg_outputs  }}
-        run: |
-          echo "cluster_name=$(echo $TG_OUTPUTS | jq -r '.cluster_name.value')" >> $GITHUB_OUTPUT
 
   ecs-responder-svc:
     needs:
