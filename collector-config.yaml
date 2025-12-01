@@ -2,11 +2,11 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: 0.0.0.0:4317
+        endpoint: ${OTEL_ENDPOINT}
 
 exporters:
   awsxray:
-    region: eu-west-2
+    region: ${AWS_REGION}
 
 processors:
   probabilistic_sampler:
