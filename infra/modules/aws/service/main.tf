@@ -37,10 +37,10 @@ module "network" {
 }
 
 module "ecs" {
-  source = "./internal_ecs"
+  source = "./ecs"
 
   security_group_id   = data.terraform_remote_state.security.outputs.ecs_sg
-  cluster_name        = var.cluster_name
+  cluster_id          = data.terraform_remote_state.cluster.outputs.cluster_id
   service_name        = var.service_name
   private_subnet_ids  = data.aws_subnets.private.ids
   container_port      = var.container_port

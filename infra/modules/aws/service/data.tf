@@ -18,6 +18,16 @@ data "terraform_remote_state" "security" {
   }
 }
 
+data "terraform_remote_state" "cluster" {
+  backend = "s3"
+
+  config = {
+    bucket = var.state_bucket
+    key    = "${var.environment}/aws/cluster/terraform.tfstate"
+    region = var.aws_region
+  }
+}
+
 data "aws_vpc" "this" {
   filter {
     name   = "tag:Name"
