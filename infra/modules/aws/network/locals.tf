@@ -1,5 +1,5 @@
 locals {
-  full_tg_name = "${var.project_name}-tg"
+  full_tg_name      = "${var.project_name}-tg"
   target_group_name = length(local.full_tg_name) > 32 ? substr(local.full_tg_name, 0, 32) : local.full_tg_name
 
   base_interface_endpoints = {

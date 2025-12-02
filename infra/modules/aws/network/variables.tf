@@ -11,7 +11,7 @@ variable "aws_region" {
 }
 
 variable "container_port" {
-  type    = number
+  type = number
 }
 
 variable "local_tunnel" {

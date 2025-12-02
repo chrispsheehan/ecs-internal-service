@@ -19,7 +19,7 @@ variable "service_name" {
 }
 
 variable "container_port" {
-  type    = number
+  type = number
 }
 
 variable "task_definition_arn" {
