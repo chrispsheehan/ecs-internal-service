@@ -68,7 +68,6 @@ resource "aws_apigatewayv2_route" "default_route" {
   target    = "integrations/${aws_apigatewayv2_integration.default_http_integration.id}"
 }
 
-
 resource "aws_lb" "internal" {
   name               = local.full_tg_name
   internal           = true

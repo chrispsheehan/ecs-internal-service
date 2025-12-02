@@ -141,48 +141,48 @@ jobs:
         run: |
           echo "internal_dns=$(echo $TG_OUTPUTS | jq -r '.internal_dns.value')" >> $GITHUB_OUTPUT
 
-  # task-caller:
-  #   needs: ecs-responder-svc
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     task_definition_arn: ${{ steps.get-task.outputs.task_definition_arn }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  task-caller:
+    needs: ecs-responder-svc
+    runs-on: ubuntu-latest
+    outputs:
+      task_definition_arn: ${{ steps.get-task.outputs.task_definition_arn }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       id: task
-  #       env: 
-  #         TF_VAR_image_uri: ${{ inputs.app_caller_image_uri }}
-  #         TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
-  #         TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/task-caller
-  #         override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "http://${{ needs.ecs-responder-svc.outputs.internal_dns }}"}]}'
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: task
+        env: 
+          TF_VAR_image_uri: ${{ inputs.app_caller_image_uri }}
+          TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
+          TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task-caller
+          override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "http://${{ needs.ecs-responder-svc.outputs.internal_dns }}"}]}'
 
-  #     - name: get task
-  #       id: get-task
-  #       env:
-  #         TG_OUTPUTS: ${{ steps.task.outputs.tg_outputs  }}
-  #       run: |
-  #         echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
+      - name: get task
+        id: get-task
+        env:
+          TG_OUTPUTS: ${{ steps.task.outputs.tg_outputs  }}
+        run: |
+          echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
 
-  # ecs-caller-svc:
-  #   needs:
-  #     - cluster
-  #     - network
-  #     - task-caller
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  ecs-caller-svc:
+    needs:
+      - cluster
+      - network
+      - task-caller
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       env: 
-  #         TF_VAR_task_definition_arn: ${{ needs.task-caller.outputs.task_definition_arn }}
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-caller-svc
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_task_definition_arn: ${{ needs.task-caller.outputs.task_definition_arn }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-caller-svc

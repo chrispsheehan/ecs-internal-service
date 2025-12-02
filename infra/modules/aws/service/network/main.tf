@@ -1,47 +1,39 @@
-# resource "aws_apigatewayv2_integration" "http_integration" {
-#   api_id                 = var.api_id
-#   integration_type       = "HTTP_PROXY"
-#   integration_uri        = aws_lb_listener.http.arn
-#   integration_method     = "ANY"
-#   connection_type        = "VPC_LINK"
-#   connection_id          = var.connection_id
-#   payload_format_version = "1.0"
-#   # CRITICAL: Disables auto-scaling & CodeDeploy
-#   passthrough_behavior = "WHEN_NO_MATCH"
-# }
+resource "aws_lb_target_group" "service_target_group" {
+  count = local.is_root_path ? 0 : 1
 
-# resource "aws_apigatewayv2_route" "default_route" {
-#   api_id    = var.api_id
-#   route_key = "ANY /{proxy+}"
-#   target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
-# }
+  name        = local.target_group_name
+  port        = var.container_port
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
 
-# resource "aws_lb_target_group" "ecs" {
-#   name        = "${var.service_name}-tg"
-#   port        = var.container_port
-#   protocol    = "HTTP"
-#   target_type = "ip"
-#   vpc_id      = var.vpc_id
+  health_check {
+    path                = "/health"
+    matcher             = "200-399"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    port                = "traffic-port"
+    protocol            = "HTTP"
+  }
+}
 
-#   health_check {
-#     path                = "/health"
-#     matcher             = "200-399"
-#     interval            = 30
-#     timeout             = 5
-#     healthy_threshold   = 2
-#     unhealthy_threshold = 2
-#     port                = "traffic-port"
-#     protocol            = "HTTP"
-#   }
-# }
 
-# resource "aws_lb_listener" "http" {
-#   load_balancer_arn = var.load_balancer_arn
-#   port              = 80
-#   protocol          = "HTTP"
+resource "aws_lb_listener_rule" "service_path" {
+  count = local.is_root_path ? 0 : 1
 
-#   default_action {
-#     type             = "forward"
-#     target_group_arn = aws_lb_target_group.ecs.arn
-#   }
-# }
+  listener_arn = var.default_http_listener_arn
+  priority     = local.priority
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.service_target_group[0].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/${var.service_path}/*"]
+    }
+  }
+}

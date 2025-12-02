@@ -26,6 +26,12 @@ variable "task_definition_arn" {
   type = string
 }
 
+variable "service_path" {
+  description = "The path to serve the service from. / is for default /example_service is for subpath"
+  default     = "/"
+  type        = string
+}
+
 variable "connection_type" {
   description = "Type of connectivity/integration to use for the service (choices: internal, internal_dns, vpc_link)."
   type        = string
