@@ -11,7 +11,7 @@ data "terraform_remote_state" "security" {
 data "aws_vpc" "this" {
   filter {
     name   = "tag:Name"
-    values = ["vpc"]
+    values = [var.vpc_name]
   }
 }
 

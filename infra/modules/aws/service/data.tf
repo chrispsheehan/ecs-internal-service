@@ -31,7 +31,7 @@ data "terraform_remote_state" "cluster" {
 data "aws_vpc" "this" {
   filter {
     name   = "tag:Name"
-    values = ["vpc"]
+    values = [var.vpc_name]
   }
 }
 
