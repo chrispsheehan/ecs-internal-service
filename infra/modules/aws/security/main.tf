@@ -1,6 +1,6 @@
 resource "aws_security_group" "vpc_link_sg" {
   name_prefix = "${var.project_name}-vpc-link"
-  vpc_id      = var.vpc_id
+  vpc_id      = data.aws_vpc.this.id
 }
 
 resource "aws_security_group_rule" "egress_vpc_link_to_lb" {
@@ -14,7 +14,7 @@ resource "aws_security_group_rule" "egress_vpc_link_to_lb" {
 
 resource "aws_security_group" "lb_sg" {
   name_prefix = "${var.project_name}-vpc-link-lb"
-  vpc_id      = var.vpc_id
+  vpc_id      = data.aws_vpc.this.id
   description = "Security group for internal ALB/NLB accessible via VPC Link"
 }
 
@@ -56,7 +56,7 @@ resource "aws_security_group_rule" "egress_lb_to_ecs" {
 
 resource "aws_security_group" "ecs_sg" {
   name_prefix = "${var.project_name}-ecs-fargate"
-  vpc_id      = var.vpc_id
+  vpc_id      = data.aws_vpc.this.id
   description = "ECS Fargate tasks"
 }
 
