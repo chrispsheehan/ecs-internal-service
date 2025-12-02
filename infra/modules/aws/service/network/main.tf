@@ -10,6 +10,12 @@ resource "aws_apigatewayv2_integration" "http_integration" {
   passthrough_behavior = "WHEN_NO_MATCH"
 }
 
+resource "aws_apigatewayv2_route" "default_route" {
+  api_id    = var.api_id
+  route_key = "ANY /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
+}
+
 resource "aws_lb_target_group" "ecs" {
   name        = "${var.service_name}-tg"
   port        = var.container_port
@@ -30,7 +36,7 @@ resource "aws_lb_target_group" "ecs" {
 }
 
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.internal.arn
+  load_balancer_arn = var.load_balancer_arn
   port              = 80
   protocol          = "HTTP"
 
