@@ -63,6 +63,6 @@ variable "python_app" {
 }
 
 variable "root_path" {
-  type = string
+  type    = string
   default = "/"
 }
