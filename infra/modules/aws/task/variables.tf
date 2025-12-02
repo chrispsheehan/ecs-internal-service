@@ -61,3 +61,8 @@ variable "additional_env_vars" {
 variable "python_app" {
   type = string
 }
+
+variable "root_path" {
+  type = string
+  default = "/"
+}
