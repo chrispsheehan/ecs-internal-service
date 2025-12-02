@@ -14,10 +14,6 @@ variable "container_port" {
   type = number
 }
 
-variable "load_balancer_arn" {
-  type = string
-}
-
 variable "default_target_group_arn" {
   type = string
 }

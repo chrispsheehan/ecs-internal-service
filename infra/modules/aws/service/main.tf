@@ -8,8 +8,6 @@ module "network" {
   service_path   = var.service_path
   container_port = var.container_port
 
-  load_balancer_arn = data.terraform_remote_state.network.outputs.load_balancer_arn
-
   default_target_group_arn  = data.terraform_remote_state.network.outputs.default_target_group_arn
   default_http_listener_arn = data.terraform_remote_state.network.outputs.default_http_listener_arn
 }
