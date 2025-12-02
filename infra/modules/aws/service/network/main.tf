@@ -19,7 +19,6 @@ resource "aws_lb_target_group" "service_target_group" {
   }
 }
 
-
 resource "aws_lb_listener_rule" "service_path" {
   count = local.is_root_path ? 0 : 1
 

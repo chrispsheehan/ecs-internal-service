@@ -26,7 +26,7 @@ services:
       - .env
     environment:
       AWS_XRAY_ENDPOINT: http://otel-collector:4317
-      AWS_SERVICE_NAME: app-caller
+      AWS_SERVICE_NAME: local-caller
       IMAGE: docker-compose-app-caller
       DOWNSTREAM_URL: http://app-responder:3000
     volumes:
@@ -50,7 +50,7 @@ services:
       - .env
     environment:
       AWS_XRAY_ENDPOINT: http://otel-collector:4317
-      AWS_SERVICE_NAME: app-responder
+      AWS_SERVICE_NAME: local-responder
       IMAGE: docker-compose-app-responder
     volumes:
       - ./src:/usr/app/app
