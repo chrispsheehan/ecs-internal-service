@@ -10,6 +10,10 @@ variable "container_port" {
   type = number
 }
 
+variable "load_balancer_arn" {
+  type = string
+}
+
 variable "api_id" {
   type = string
 }
