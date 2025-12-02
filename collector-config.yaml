@@ -13,9 +13,17 @@ processors:
     hash_seed: 22
     sampling_percentage: ${OTEL_SAMPLING_PERCENTAGE}
 
+  filter/health:
+    traces:
+      span:
+        - 'attributes["http.target"] == "/health"'
+        - 'attributes["http.path"] == "/health"'
+        - 'name == "health"'
+        - 'attributes["url.path"] == "/health"'
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [probabilistic_sampler]
+      processors: [filter/health, probabilistic_sampler]
       exporters: [awsxray]
