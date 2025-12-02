@@ -93,7 +93,7 @@ resource "aws_security_group_rule" "ingress_vpc_to_https" {
   security_group_id = aws_security_group.vpc_endpoint.id
 }
 
-resource "aws_security_group_rule" "ingress_vpc_to_https" {
+resource "aws_security_group_rule" "egress_vpc_to_https" {
   type              = "egress"
   from_port         = 443
   to_port           = 443
