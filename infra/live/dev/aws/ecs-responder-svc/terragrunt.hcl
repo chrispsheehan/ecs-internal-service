@@ -8,7 +8,7 @@ locals {
 }
 
 inputs = {
-  service_name = local.service_name
+  service_name    = local.service_name
   connection_type = local.connection_type
 }
 

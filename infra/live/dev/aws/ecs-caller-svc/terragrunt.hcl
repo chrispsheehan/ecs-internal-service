@@ -3,12 +3,12 @@ include {
 }
 
 locals {
-  service_name = "ecs-internal-caller-svc"
+  service_name    = "ecs-internal-caller-svc"
   connection_type = "vpc_link"
 }
 
 inputs = {
-  service_name = local.service_name
+  service_name    = local.service_name
   connection_type = local.connection_type
 }
 

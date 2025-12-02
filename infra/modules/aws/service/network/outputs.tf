@@ -1,3 +1,3 @@
 output "target_group_arn" {
-  value = aws_lb_target_group.ecs.arn
+  value = var.default_target_group_arn
 }

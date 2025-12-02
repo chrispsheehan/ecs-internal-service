@@ -50,11 +50,60 @@ resource "aws_apigatewayv2_stage" "default_stage" {
   auto_deploy = true
 }
 
+resource "aws_apigatewayv2_integration" "default_http_integration" {
+  api_id                 = aws_apigatewayv2_api.http_api.id
+  integration_type       = "HTTP_PROXY"
+  integration_uri        = aws_lb_listener.default_http_listener.arn
+  integration_method     = "ANY"
+  connection_type        = "VPC_LINK"
+  connection_id          = aws_apigatewayv2_vpc_link.vpc_link.id
+  payload_format_version = "1.0"
+  # CRITICAL: Disables auto-scaling & CodeDeploy
+  passthrough_behavior = "WHEN_NO_MATCH"
+}
+
+resource "aws_apigatewayv2_route" "default_route" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "ANY /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
+}
+
+
 resource "aws_lb" "internal" {
-  name               = "${var.project_name}-alb"
+  name               = local.full_tg_name
   internal           = true
   load_balancer_type = "application"
   security_groups    = [data.terraform_remote_state.security.outputs.lb_sg]
 
   subnets = data.aws_subnets.private.ids
+}
+
+resource "aws_lb_target_group" "default_target_group" {
+  name        = local.target_group_name
+  port        = var.container_port
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = data.aws_vpc.this.id
+
+  health_check {
+    path                = "/health"
+    matcher             = "200-399"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    port                = "traffic-port"
+    protocol            = "HTTP"
+  }
+}
+
+resource "aws_lb_listener" "default_http_listener" {
+  load_balancer_arn = aws_lb.internal.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.default_target_group.arn
+  }
 }

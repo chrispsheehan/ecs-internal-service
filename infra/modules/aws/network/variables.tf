@@ -10,6 +10,10 @@ variable "aws_region" {
   type = string
 }
 
+variable "container_port" {
+  type    = number
+}
+
 variable "local_tunnel" {
   type    = bool
   default = false

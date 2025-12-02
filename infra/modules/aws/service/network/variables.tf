@@ -21,3 +21,7 @@ variable "api_id" {
 variable "connection_id" {
   type = string
 }
+
+variable "default_target_group_arn" {
+  type = string
+}
