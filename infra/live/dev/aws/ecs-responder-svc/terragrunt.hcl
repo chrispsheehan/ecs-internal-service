@@ -11,7 +11,7 @@ locals {
 inputs = {
   service_name    = local.service_name
   connection_type = local.connection_type
-  root_path       = local.root
+  root_path       = local.root_path
 }
 
 terraform {
