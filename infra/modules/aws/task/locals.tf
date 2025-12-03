@@ -24,7 +24,7 @@ locals {
     },
     {
       name  = "ROOT_PATH"
-      value = "${var.root_path}"
+      value = "/${var.root_path}"
     },
   ]
 
