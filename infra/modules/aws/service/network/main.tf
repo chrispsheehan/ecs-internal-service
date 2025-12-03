@@ -37,16 +37,16 @@ resource "aws_lb_listener_rule" "service" {
   }
 }
 
-resource "aws_apigatewayv2_route" "block_responder" {
+resource "aws_apigatewayv2_route" "block" {
   count = local.vpc_link_count
 
   api_id    = var.api_vpc_link_id
   route_key = "ANY /${var.root_path}/{proxy+}"
 
-  target = "integrations/${aws_apigatewayv2_integration.block_responder[0].id}"
+  target = "integrations/${aws_apigatewayv2_integration.block[0].id}"
 }
 
-resource "aws_apigatewayv2_integration" "block_responder" {
+resource "aws_apigatewayv2_integration" "block" {
   count = local.vpc_link_count
 
   api_id             = var.api_vpc_link_id
