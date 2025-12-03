@@ -3,11 +3,15 @@ include {
 }
 
 locals {
-  service_name = "ecs-internal-responder-svc"
+  service_name    = "ecs-internal-responder-svc"
+  connection_type = "internal_dns"
+  root_path       = "responder"
 }
 
 inputs = {
-  service_name = local.service_name
+  service_name    = local.service_name
+  connection_type = local.connection_type
+  root_path       = local.root_path
 }
 
 terraform {

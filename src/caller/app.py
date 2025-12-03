@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from typing import Dict, Any
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import APIRouter, FastAPI, Request, HTTPException
 import httpx
 
 from opentelemetry import trace, propagate
@@ -20,6 +20,10 @@ DOWNSTREAM_URL = os.getenv("DOWNSTREAM_URL", "http://downstream:8080")
 XRAY_ENDPOINT  = os.getenv("AWS_XRAY_ENDPOINT", "NOT_SET")
 SERVICE_NAME   = os.getenv("AWS_SERVICE_NAME", "caller-service")
 IMAGE          = os.getenv("IMAGE", "NOT_FOUND")
+ROOT_PATH      = os.getenv("ROOT_PATH", "")
+
+router = APIRouter(prefix=ROOT_PATH)
+app = FastAPI()
 
 # -------------------------
 # otel (x-ray ids + otlp)
@@ -36,11 +40,6 @@ trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(otlp_exporter)
 
 tracer = trace.get_tracer(__name__)
 PROPAGATOR = propagate.get_global_textmap()
-
-# -------------------------
-# app
-# -------------------------
-app = FastAPI()
 
 @app.middleware("http")
 async def otel_server_middleware(request: Request, call_next):
@@ -100,11 +99,11 @@ async def call_downstream_same_path(path: str) -> Dict[str, Any]:
 # -------------------------
 # routes (same names as downstream)
 # -------------------------
-@app.get("/health")
+@router.get("/health")
 async def health():
     return {"msg": f"{SERVICE_NAME}  ok"}
 
-@app.get("/host")
+@router.get("/host")
 async def host():
     hostname = os.uname().nodename
     current_time = datetime.utcnow().isoformat()
@@ -119,14 +118,16 @@ async def host():
         **downstream,
     }
 
-@app.get("/boto3-test")
+@router.get("/boto3-test")
 async def boto3_test():
     return await call_downstream_same_path("/boto3-test")
 
-@app.get("/requests-test")
+@router.get("/requests-test")
 async def requests_test():
     return await call_downstream_same_path("/requests-test")
 
-@app.get("/httpx-test")
+@router.get("/httpx-test")
 async def httpx_test():
     return await call_downstream_same_path("/httpx-test")
+
+app.include_router(router)

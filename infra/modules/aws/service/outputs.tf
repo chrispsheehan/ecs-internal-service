@@ -1,3 +1,3 @@
-output "api_invoke_url" {
-  value = module.api_vpc_link.api_invoke_url
+output "invoke_url" {
+  value = local.invoke_url
 }

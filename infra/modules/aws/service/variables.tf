@@ -1,4 +1,16 @@
-variable "cluster_name" {
+variable "state_bucket" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "aws_region" {
+  type = string
+}
+
+variable "vpc_name" {
   type = string
 }
 
@@ -7,12 +19,17 @@ variable "service_name" {
 }
 
 variable "container_port" {
-  type    = number
-  default = 3000
+  type = number
 }
 
 variable "task_definition_arn" {
   type = string
+}
+
+variable "root_path" {
+  description = "The path to serve the service from. / is for default /example_service is for subpath"
+  default     = "/"
+  type        = string
 }
 
 variable "connection_type" {

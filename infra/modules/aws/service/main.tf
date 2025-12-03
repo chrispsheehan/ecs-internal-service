@@ -1,36 +1,25 @@
-module "security" {
-  source = "./security"
+module "network" {
+  source = "./network"
+
+  count = local.network_count
 
   vpc_id         = data.aws_vpc.this.id
   service_name   = var.service_name
+  root_path      = var.root_path
   container_port = var.container_port
-}
 
-module "load_balancer" {
-  source = "./internal_load_balancer"
+  internal_only = local.internal_only
 
-  vpc_id             = data.aws_vpc.this.id
-  security_group_id  = module.security.lb_sg
-  private_subnet_ids = data.aws_subnets.private.ids
-  cluster_name       = var.cluster_name
-  service_name       = var.service_name
-  container_port     = var.container_port
-}
-
-module "api_vpc_link" {
-  source = "./api_vpc_link"
-
-  service_name               = var.service_name
-  security_group_id          = module.security.vpc_link_sg
-  load_balancer_listener_arn = module.load_balancer.lb_listener_arn
-  private_subnet_ids         = data.aws_subnets.private.ids
+  api_vpc_link_id           = data.terraform_remote_state.network.outputs.api_id
+  default_target_group_arn  = data.terraform_remote_state.network.outputs.default_target_group_arn
+  default_http_listener_arn = data.terraform_remote_state.network.outputs.default_http_listener_arn
 }
 
 module "ecs" {
-  source = "./internal_ecs"
+  source = "./ecs"
 
-  security_group_id   = module.security.ecs_sg
-  cluster_name        = var.cluster_name
+  security_group_id   = data.terraform_remote_state.security.outputs.ecs_sg
+  cluster_id          = data.terraform_remote_state.cluster.outputs.cluster_id
   service_name        = var.service_name
   private_subnet_ids  = data.aws_subnets.private.ids
   container_port      = var.container_port
@@ -39,9 +28,5 @@ module "ecs" {
   xray_enabled = var.xray_enabled
   local_tunnel = var.local_tunnel
 
-  load_balancers = [{
-    target_group_arn = module.load_balancer.target_group_arn
-    container_name   = var.service_name
-    container_port   = var.container_port
-  }]
+  load_balancers = local.load_balancers
 }

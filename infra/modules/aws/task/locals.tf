@@ -4,6 +4,7 @@ locals {
   image_uri                    = var.image_uri
   aws_otel_collector_image_uri = var.aws_otel_collector_image_uri
   debug_image_uri              = var.debug_image_uri
+  root_path_prefix             = var.root_path != "" ? "/${var.root_path}" : ""
 
   shared_environment = [
     {
@@ -21,6 +22,10 @@ locals {
     {
       name  = "AWS_XRAY_ENDPOINT"
       value = "http://localhost:4317"
+    },
+    {
+      name  = "ROOT_PATH"
+      value = local.root_path_prefix
     },
   ]
 

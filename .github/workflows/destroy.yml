@@ -19,8 +19,10 @@ permissions:
   contents: write
 
 env:
-  TF_VAR_lambda_version: this
-  TF_VAR_cluster_name: ecs-internal-service-cluster
+  TF_VAR_image_uri: this
+  TF_VAR_aws_otel_collector_image_uri: this
+  TF_VAR_debug_image_uri: this
+  TF_VAR_task_definition_arn: "blah"
   AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
 
 jobs:
@@ -53,7 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Destroy ecrs
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         env: 
@@ -70,13 +71,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Destroy ecrs
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-        env: 
-          TF_VAR_image_uri: this
-          TF_VAR_aws_otel_collector_image_uri: this
-          TF_VAR_debug_image_uri: this
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task-responder
@@ -89,7 +85,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Destroy ecrs
         uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         with:
@@ -104,11 +99,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.infra_version }}
-
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
+          tg_action: destroy
+
+  network:
+    needs:
+      - ecs-caller-svc
+      - ecs-responder-svc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/network
+          tg_action: destroy
+
+  security:
+    needs:
+      - network
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/security
           tg_action: destroy
