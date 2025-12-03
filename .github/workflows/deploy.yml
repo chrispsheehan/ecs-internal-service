@@ -119,7 +119,7 @@ jobs:
       - network
       - task-responder
     outputs:
-      internal_dns: ${{ steps.get-vars.outputs.internal_dns }}
+      invoke_url: ${{ steps.get-vars.outputs.invoke_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -139,7 +139,7 @@ jobs:
         env:
           TG_OUTPUTS: ${{ steps.ecs-responder-svc.outputs.tg_outputs  }}
         run: |
-          echo "internal_dns=$(echo $TG_OUTPUTS | jq -r '.internal_dns.value')" >> $GITHUB_OUTPUT
+          echo "invoke_url=$(echo $TG_OUTPUTS | jq -r '.invoke_url')" >> $GITHUB_OUTPUT
 
   task-caller:
     needs: ecs-responder-svc
@@ -160,7 +160,7 @@ jobs:
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task-caller
-          override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "http://${{ needs.ecs-responder-svc.outputs.internal_dns }}"}]}'
+          override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "http://${{ needs.ecs-responder-svc.outputs.invoke_url }}/responder"}]}'
 
       - name: get task
         id: get-task
