@@ -139,7 +139,7 @@ jobs:
         env:
           TG_OUTPUTS: ${{ steps.ecs-responder-svc.outputs.tg_outputs  }}
         run: |
-          echo "invoke_url=$(echo $TG_OUTPUTS | jq -r '.invoke_url')" >> $GITHUB_OUTPUT
+          echo "invoke_url=$(echo $TG_OUTPUTS | jq -r '.invoke_url.value')" >> $GITHUB_OUTPUT
 
   task-caller:
     needs: ecs-responder-svc
