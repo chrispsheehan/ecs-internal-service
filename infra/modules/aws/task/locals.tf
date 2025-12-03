@@ -4,6 +4,7 @@ locals {
   image_uri                    = var.image_uri
   aws_otel_collector_image_uri = var.aws_otel_collector_image_uri
   debug_image_uri              = var.debug_image_uri
+  root_path_prefix             = var.root_path != "" ? "/${var.root_path}" : ""
 
   shared_environment = [
     {
@@ -24,7 +25,7 @@ locals {
     },
     {
       name  = "ROOT_PATH"
-      value = "/${var.root_path}"
+      value = local.root_path_prefix
     },
   ]
 
