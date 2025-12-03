@@ -1,5 +1,6 @@
 locals {
   network_count = var.connection_type == "internal_dns" || var.connection_type == "vpc_link" ? 1 : 0
+  internal_only = var.connection_type == "internal_dns"
 
   load_balancers = var.connection_type == "internal_dns" || var.connection_type == "vpc_link" ? [{
     target_group_arn = module.network[0].target_group_arn

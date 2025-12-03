@@ -36,3 +36,21 @@ resource "aws_lb_listener_rule" "service" {
     }
   }
 }
+
+resource "aws_apigatewayv2_route" "block_responder" {
+  count = local.vpc_link_count
+
+  api_id    = var.api_vpc_link_id
+  route_key = "ANY /${var.root_path}/{proxy+}"
+
+  target = "integrations/${aws_apigatewayv2_integration.block_responder[0].id}"
+}
+
+resource "aws_apigatewayv2_integration" "block_responder" {
+  count = local.vpc_link_count
+
+  api_id             = var.api_vpc_link_id
+  integration_type   = "HTTP_PROXY"
+  integration_method = "ANY"
+  integration_uri    = "https://httpbin.org/status/403"
+}

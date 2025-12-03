@@ -8,6 +8,9 @@ module "network" {
   root_path      = var.root_path
   container_port = var.container_port
 
+  internal_only = local.internal_only
+
+  api_vpc_link_id           = data.terraform_remote_state.network.outputs.api_id
   default_target_group_arn  = data.terraform_remote_state.network.outputs.default_target_group_arn
   default_http_listener_arn = data.terraform_remote_state.network.outputs.default_http_listener_arn
 }
