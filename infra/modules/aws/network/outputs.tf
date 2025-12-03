@@ -10,8 +10,12 @@ output "load_balancer_arn" {
   value = aws_lb.internal.arn
 }
 
-output "api_invoke_url" {
-  value = aws_apigatewayv2_stage.default_stage.invoke_url
+output "public_invoke_url" {
+  value = trimsuffix(aws_apigatewayv2_stage.default_stage.invoke_url, "/")
+}
+
+output "internal_invoke_url" {
+  value = "http://${aws_lb.internal.dns_name}"
 }
 
 output "default_target_group_arn" {

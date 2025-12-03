@@ -4,7 +4,7 @@ include {
 
 locals {
   service_name    = "ecs-internal-responder-svc"
-  connection_type = "vpc_link"
+  connection_type = "internal_dns"
   root_path       = "responder"
 }
 
