@@ -89,8 +89,6 @@ jobs:
   task-responder:
     needs: setup
     runs-on: ubuntu-latest
-    outputs:
-      task_definition_arn: ${{ steps.get-task.outputs.task_definition_arn }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -105,13 +103,6 @@ jobs:
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task_responder
-
-      - name: get task
-        id: get-task
-        env:
-          TG_OUTPUTS: ${{ steps.task.outputs.tg_outputs  }}
-        run: |
-          echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
 
   ecs-responder-svc:
     needs:
@@ -128,8 +119,6 @@ jobs:
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
         id: ecs-responder-svc
-        env:
-          TF_VAR_task_definition_arn: ${{ needs.task-responder.outputs.task_definition_arn }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-responder-svc
@@ -144,8 +133,6 @@ jobs:
   task-caller:
     needs: ecs-responder-svc
     runs-on: ubuntu-latest
-    outputs:
-      task_definition_arn: ${{ steps.get-task.outputs.task_definition_arn }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -162,13 +149,6 @@ jobs:
           tg_directory: infra/live/${{ inputs.environment }}/aws/task_caller
           override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "${{ needs.ecs-responder-svc.outputs.invoke_url }}"}]}'
 
-      - name: get task
-        id: get-task
-        env:
-          TG_OUTPUTS: ${{ steps.task.outputs.tg_outputs  }}
-        run: |
-          echo "task_definition_arn=$(echo $TG_OUTPUTS | jq -r '.task_definition_arn.value')" >> $GITHUB_OUTPUT
-
   ecs-caller-svc:
     needs:
       - cluster
@@ -181,8 +161,6 @@ jobs:
           ref: ${{ inputs.infra_version }}
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-        env: 
-          TF_VAR_task_definition_arn: ${{ needs.task-caller.outputs.task_definition_arn }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/ecs-caller-svc
