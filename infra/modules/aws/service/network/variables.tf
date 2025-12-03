@@ -6,7 +6,7 @@ variable "service_name" {
   type = string
 }
 
-variable "service_path" {
+variable "root_path" {
   type = string
 }
 

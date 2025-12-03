@@ -5,7 +5,7 @@ module "network" {
 
   vpc_id         = data.aws_vpc.this.id
   service_name   = var.service_name
-  service_path   = var.service_path
+  root_path      = var.root_path
   container_port = var.container_port
 
   default_target_group_arn  = data.terraform_remote_state.network.outputs.default_target_group_arn

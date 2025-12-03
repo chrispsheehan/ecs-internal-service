@@ -1,5 +1,5 @@
 resource "aws_lb_target_group" "service_target_group" {
-  count = local.is_root_path ? 0 : 1
+  count = local.is_default_path ? 0 : 1
 
   name        = local.target_group_name
   port        = var.container_port
@@ -8,7 +8,7 @@ resource "aws_lb_target_group" "service_target_group" {
   vpc_id      = var.vpc_id
 
   health_check {
-    path                = "/health"
+    path                = local.health_check_path
     matcher             = "200-399"
     interval            = 30
     timeout             = 5
@@ -19,8 +19,8 @@ resource "aws_lb_target_group" "service_target_group" {
   }
 }
 
-resource "aws_lb_listener_rule" "service_path" {
-  count = local.is_root_path ? 0 : 1
+resource "aws_lb_listener_rule" "service" {
+  count = local.is_default_path ? 0 : 1
 
   listener_arn = var.default_http_listener_arn
   priority     = local.priority
@@ -32,7 +32,7 @@ resource "aws_lb_listener_rule" "service_path" {
 
   condition {
     path_pattern {
-      values = ["/${var.service_path}/*"]
+      values = ["/${var.root_path}/*"]
     }
   }
 }

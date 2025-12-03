@@ -4,7 +4,9 @@ locals {
   full_tg_name      = "${var.service_name}-tg"
   target_group_name = length(local.full_tg_name) > 32 ? substr(local.full_tg_name, 0, 32) : local.full_tg_name
 
-  is_root_path = var.service_path == "/"
+  is_default_path = var.root_path == "/"
 
-  target_group_arn = local.is_root_path ? var.default_target_group_arn : aws_lb_target_group.service_target_group[0].arn
+  health_check_path = local.is_default_path ? "/health" : "/${var.root_path}/health"
+
+  target_group_arn = local.is_default_path ? var.default_target_group_arn : aws_lb_target_group.service_target_group[0].arn
 }

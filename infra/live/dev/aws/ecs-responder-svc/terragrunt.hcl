@@ -5,13 +5,13 @@ include {
 locals {
   service_name    = "ecs-internal-responder-svc"
   connection_type = "vpc_link"
-  service_path    = "responder"
+  root_path       = "responder"
 }
 
 inputs = {
   service_name    = local.service_name
   connection_type = local.connection_type
-  service_path    = local.service_path
+  root_path       = local.root
 }
 
 terraform {
