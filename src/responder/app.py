@@ -120,7 +120,7 @@ def requests_test():
     return {
         "status_code": response.status_code,
         "message": f"Received {len(response.content)} bytes",
-        "imageUri": image,
+        "imageUri": IMAGE,
     }
 
 
@@ -148,7 +148,7 @@ async def httpx_test():
     return {
         "status_code": response.status_code,
         "message": f"Received {len(response.content)} bytes",
-        "imageUri": image,
+        "imageUri": IMAGE,
     }
 
 app.include_router(router)
