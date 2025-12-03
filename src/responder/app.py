@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 import boto3
 import requests
 import httpx
@@ -14,10 +14,12 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
 from opentelemetry.trace import SpanKind
 
-image = os.getenv("IMAGE", "NOT_FOUND")
-xray_endpoint = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
+IMAGE          = os.getenv("IMAGE", "NOT_FOUND")
+XRAY_ENDPOINT  = os.getenv("AWS_XRAY_ENDPOINT", "NOT_FOUND")
 SERVICE_NAME   = os.getenv("AWS_SERVICE_NAME", "responder-service")
+ROOT_PATH      = os.getenv("ROOT_PATH", "")
 
+router = APIRouter(prefix=ROOT_PATH)
 app = FastAPI()
 s3_client = boto3.client('s3')
 
@@ -29,7 +31,7 @@ trace.set_tracer_provider(
     )
 )
 
-otlp_exporter = OTLPSpanExporter(endpoint=xray_endpoint, insecure=True)
+otlp_exporter = OTLPSpanExporter(endpoint=XRAY_ENDPOINT, insecure=True)
 trace.get_tracer_provider().add_span_processor(
     BatchSpanProcessor(otlp_exporter)
 )
@@ -61,23 +63,23 @@ async def otel_server_middleware(request: Request, call_next):
         return response
 
 
-@app.get("/health")
+@router.get("/health")
 async def health():
     return {"msg": f"{SERVICE_NAME}  ok"}
 
 
-@app.get("/host")
+@router.get("/host")
 async def host_info():
     hostname = os.uname().nodename
     current_time = datetime.utcnow().isoformat()
     return {
         "message": f"Request handled by backend at {current_time}",
-        "imageUri": image,
+        "imageUri": IMAGE,
         "hostname": hostname,
     }
 
 
-@app.get("/boto3-test")
+@router.get("/boto3-test")
 def boto3_test():
     with tracer.start_as_current_span(
         "S3 ListBuckets",
@@ -95,7 +97,7 @@ def boto3_test():
         return {"bucket_names": bucket_names}
 
 
-@app.get("/requests-test")
+@router.get("/requests-test")
 def requests_test():
     url = "https://example.com"
 
@@ -122,7 +124,7 @@ def requests_test():
     }
 
 
-@app.get("/httpx-test")
+@router.get("/httpx-test")
 async def httpx_test():
     url = "https://example.com"
 
@@ -148,3 +150,5 @@ async def httpx_test():
         "message": f"Received {len(response.content)} bytes",
         "imageUri": image,
     }
+
+app.include_router(router)

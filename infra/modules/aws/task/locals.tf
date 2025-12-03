@@ -22,6 +22,10 @@ locals {
       name  = "AWS_XRAY_ENDPOINT"
       value = "http://localhost:4317"
     },
+    {
+      name  = "ROOT_PATH"
+      value = "${var.root_path}"
+    },
   ]
 
   otel_environment = [
@@ -79,7 +83,7 @@ locals {
     essential   = true
     environment = concat(local.shared_environment, var.additional_env_vars)
 
-    command = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "-root-path", "${var.root_path}", "${var.python_app}"]
+    command = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "${var.python_app}"]
   }
 
   otel-collector = {

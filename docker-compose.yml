@@ -28,7 +28,7 @@ services:
       AWS_XRAY_ENDPOINT: http://otel-collector:4317
       AWS_SERVICE_NAME: local-caller
       IMAGE: docker-compose-app-caller
-      DOWNSTREAM_URL: http://app-responder:3000
+      DOWNSTREAM_URL: http://app-responder:3000/responder
     volumes:
       - ./src:/usr/app/app
     command: uvicorn app.caller.app:app --host 0.0.0.0 --port 3000 --reload
@@ -52,6 +52,7 @@ services:
       AWS_XRAY_ENDPOINT: http://otel-collector:4317
       AWS_SERVICE_NAME: local-responder
       IMAGE: docker-compose-app-responder
+      ROOT_PATH: /responder
     volumes:
       - ./src:/usr/app/app
     command: uvicorn app.responder.app:app --host 0.0.0.0 --port 3000 --reload
