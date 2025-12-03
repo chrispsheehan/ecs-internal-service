@@ -104,7 +104,7 @@ jobs:
           TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-          tg_directory: infra/live/${{ inputs.environment }}/aws/task-responder
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task_responder
 
       - name: get task
         id: get-task
@@ -159,7 +159,7 @@ jobs:
           TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-          tg_directory: infra/live/${{ inputs.environment }}/aws/task-caller
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task_caller
           override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "${{ needs.ecs-responder-svc.outputs.invoke_url }}"}]}'
 
       - name: get task

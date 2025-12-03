@@ -5,3 +5,11 @@ output "task_definition_arn" {
 output "cloudwatch_log_group" {
   value = aws_cloudwatch_log_group.ecs_log_group.name
 }
+
+output "root_path" {
+  value = var.root_path
+}
+
+output "service_name" {
+  value = var.service_name
+}
