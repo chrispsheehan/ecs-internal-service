@@ -15,5 +15,5 @@ inputs = {
 }
 
 terraform {
-  source = "../../../../modules//aws//service"
+  source = "../../../../modules//aws//service_responder"
 }

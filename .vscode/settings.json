@@ -1,5 +1,7 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/env/bin/python",
   "python.terminal.activateEnvironment": true,
-  "python-envs.pythonProjects": []
+  "python-envs.pythonProjects": [],
+  "terraform.validation.enableEnhancedValidation": true,
+  "terraform.codelens.referenceCount": true
 }

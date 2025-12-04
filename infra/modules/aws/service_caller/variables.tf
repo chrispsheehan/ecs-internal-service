@@ -14,16 +14,8 @@ variable "vpc_name" {
   type = string
 }
 
-variable "service_name" {
-  type = string
-}
-
 variable "container_port" {
   type = number
-}
-
-variable "task_definition_arn" {
-  type = string
 }
 
 variable "root_path" {
