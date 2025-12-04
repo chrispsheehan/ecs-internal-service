@@ -15,12 +15,7 @@ module "task_responder" {
   local_tunnel = var.local_tunnel
   xray_enabled = var.xray_enabled
 
-  additional_env_vars = [
-    {
-      "name"  = "DOWNSTREAM_URL",
-      "value" = "${var.downstream_url}"
-    }
-  ]
+  additional_env_vars = []
   additional_runtime_policy_arns = [
     aws_iam_policy.s3_list_policy.arn
   ]
