@@ -75,10 +75,9 @@ services:
       AWS_XRAY_ENDPOINT: http://otel-collector:4317
       AWS_SERVICE_NAME: local-consumer
       IMAGE: docker-compose-app-consumer
-      POLL_TIMEOUT: 30
     volumes:
       - ./src:/usr/app/app
-    command: python consumer/app.py
+    command: python -u consumer/app.py
     depends_on:
       - otel-collector
     networks:

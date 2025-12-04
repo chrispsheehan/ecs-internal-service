@@ -54,4 +54,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src/consumer ./consumer
 
-CMD ["python", "consumer/app.py"]
+CMD ["python", "-u", "consumer/app.py"]

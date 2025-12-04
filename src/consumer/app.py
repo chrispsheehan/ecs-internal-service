@@ -9,12 +9,17 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
-QUEUE_URL      = os.environ['SQS_QUEUE_URL']
-XRAY_ENDPOINT  = os.getenv("AWS_XRAY_ENDPOINT", "NOT_SET")
-SERVICE_NAME   = os.getenv("AWS_SERVICE_NAME", "consumer-service")
-POLL_TIMEOUT   = os.getenv("POLL_TIMEOUT", "60")
+QUEUE_URL  = os.environ['AWS_SQS_QUEUE_URL']
+AWS_REGION = os.environ['AWS_REGION']
 
-sqs = boto3.client('sqs')
+XRAY_ENDPOINT = os.getenv("AWS_XRAY_ENDPOINT", "NOT_SET")
+SERVICE_NAME  = os.getenv("AWS_SERVICE_NAME", "consumer-service")
+POLL_TIMEOUT  = int(os.getenv("POLL_TIMEOUT", "60"))
+
+
+sqs = boto3.client(
+    'sqs',
+    region_name=AWS_REGION)
 
 resource = Resource.create({"service.name": SERVICE_NAME})
 trace.set_tracer_provider(
@@ -48,7 +53,6 @@ def poll():
                 with tracer.start_as_current_span("sqs.process_message") as msg_span:
                     msg_span.set_attribute("messaging.message_id", msg['MessageId'])
                     print(f"Processing: {msg['Body']}")
-                    # Your processing logic here
                     sqs.delete_message(QueueUrl=QUEUE_URL, ReceiptHandle=msg['ReceiptHandle'])
                     print(f"Deleted {msg['MessageId']}")
 
