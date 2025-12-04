@@ -1,5 +1,5 @@
 locals {
-  priority       = tonumber(substr(md5(var.service_name), 0, 2)) % 90 + 10
+  priority       = parseint(substr(md5(var.service_name), 0, 2), 16) % 90 + 10
   vpc_link_count = var.internal_only ? 1 : 0
 
   full_tg_name      = "${var.service_name}-tg"
