@@ -22,19 +22,16 @@ variable "container_port" {
   type = number
 }
 
-variable "task_definition_arn" {
-  type = string
-}
-
 variable "root_path" {
   description = "The path to serve the service from. / is for default /example_service is for subpath"
+  default     = "/"
   type        = string
-  default     = ""
 }
 
 variable "connection_type" {
   description = "Type of connectivity/integration to use for the service (choices: internal, internal_dns, vpc_link)."
   type        = string
+  default     = "internal"
   validation {
     condition     = can(regex("^(internal|internal_dns|vpc_link)$", var.connection_type))
     error_message = "connection_type must be one of: internal, internal_dns, vpc_link."
@@ -54,10 +51,4 @@ variable "xray_enabled" {
 variable "wait_for_steady_state" {
   type    = bool
   default = false
-}
-
-variable "additional_security_group_ids" {
-  description = "List of security groups to attach to ECS service"
-  type        = list(string)
-  default     = []
 }
