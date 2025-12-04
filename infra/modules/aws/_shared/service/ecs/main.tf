@@ -8,7 +8,7 @@ resource "aws_ecs_service" "service" {
   network_configuration {
     subnets          = var.private_subnet_ids
     assign_public_ip = false
-    security_groups  = [var.security_group_id]
+    security_groups  = var.security_group_ids
   }
 
   dynamic "load_balancer" {

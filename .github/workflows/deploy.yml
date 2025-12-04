@@ -144,10 +144,10 @@ jobs:
           TF_VAR_image_uri: ${{ inputs.app_caller_image_uri }}
           TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
           TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
+          TF_VAR_downstream_url: ${{ needs.ecs-responder-svc.outputs.invoke_url }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task_caller
-          override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "${{ needs.ecs-responder-svc.outputs.invoke_url }}"}]}'
 
   ecs-caller-svc:
     needs:

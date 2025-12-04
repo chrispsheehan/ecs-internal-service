@@ -15,8 +15,6 @@ module "task_caller" {
   local_tunnel = var.local_tunnel
   xray_enabled = var.xray_enabled
 
-  additional_env_vars = var.additional_env_vars
-
   root_path    = ""
   service_name = "ecs-caller-svc"
   python_app   = "app.caller.app:app"

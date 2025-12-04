@@ -18,7 +18,9 @@ module "network" {
 module "ecs" {
   source = "./ecs"
 
-  security_group_id   = data.terraform_remote_state.security.outputs.ecs_sg
+  security_group_ids = concat(
+    [data.terraform_remote_state.security.outputs.ecs_sg],
+  var.additional_security_group_ids)
   cluster_id          = data.terraform_remote_state.cluster.outputs.cluster_id
   service_name        = var.service_name
   private_subnet_ids  = data.aws_subnets.private.ids

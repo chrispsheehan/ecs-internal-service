@@ -54,3 +54,9 @@ variable "wait_for_steady_state" {
   type    = bool
   default = false
 }
+
+variable "additional_security_group_ids" {
+  description = "List of security groups to attach to ECS service"
+  type        = list(string)
+  default     = []
+}

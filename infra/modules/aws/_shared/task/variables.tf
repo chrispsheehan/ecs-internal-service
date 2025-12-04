@@ -65,3 +65,9 @@ variable "python_app" {
 variable "root_path" {
   type = string
 }
+
+variable "additional_runtime_policy_arns" {
+  description = "List of IAM runtime policy ARNs to attach to the role"
+  type        = list(string)
+  default     = []
+}
