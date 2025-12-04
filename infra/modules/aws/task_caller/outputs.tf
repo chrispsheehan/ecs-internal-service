@@ -1,4 +1,4 @@
-output "task_arn" {
+output "task_definition_arn" {
   value = module.task_caller.task_definition_arn
 }
 
