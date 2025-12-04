@@ -1,4 +1,4 @@
-module "task_caller" {
+module "task_responder" {
   source = "../_shared/task"
 
   project_name   = var.project_name
@@ -17,6 +17,7 @@ module "task_caller" {
 
   additional_env_vars = var.additional_env_vars
 
+  root_path = "responder"
   service_name = "ecs-responder-svc"
   python_app   = "app.responder.app:app"
 }
