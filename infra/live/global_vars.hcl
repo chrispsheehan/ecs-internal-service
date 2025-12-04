@@ -10,7 +10,8 @@ locals {
     "logs:*",
     "cloudwatch:*",
     "elasticloadbalancing:*",
-    "apigateway:*"
+    "apigateway:*",
+    "sqs:*"
   ]
   container_port = 3000
 }
