@@ -1,4 +1,4 @@
-module "service_caller" {
+module "service_responder" {
   source = "../_shared/service"
 
   vpc_name   = var.vpc_name
