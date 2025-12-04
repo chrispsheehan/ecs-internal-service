@@ -22,10 +22,6 @@ variable "container_port" {
   type = number
 }
 
-variable "task_definition_arn" {
-  type = string
-}
-
 variable "root_path" {
   description = "The path to serve the service from. / is for default /example_service is for subpath"
   default     = "/"
