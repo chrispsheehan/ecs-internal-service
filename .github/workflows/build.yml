@@ -14,6 +14,8 @@ on:
         value: ${{ jobs.app-responder.outputs.image_uri }}
       app_caller_image_uri:
         value: ${{ jobs.app-responder.outputs.image_uri }}
+      app_consumer_image_uri:
+        value: ${{ jobs.app-consumer.outputs.image_uri }}
       aws_otel_collector_image_uri: 
         value: ${{ jobs.aws-otel-collector.outputs.image_uri }}
       debug_image_uri: 
@@ -94,6 +96,30 @@ jobs:
           version: ${{ env.version }}
           push-role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN }}
           target: app-responder
+
+      - id: set_uri
+        run: |
+          echo "IMAGE_URI=${{ env.IMAGE_URI }}" >> $GITHUB_OUTPUT
+
+  app-consumer:
+    needs: ecr
+    runs-on: ubuntu-latest
+    outputs:
+      image_uri: ${{ steps.set_uri.outputs.IMAGE_URI }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and push image
+        id: build-image
+        uses: ./.github/actions/build_image
+        with:
+          aws_account_id: ${{ env.AWS_ACCOUNT_ID }}
+          aws_region: ${{ env.AWS_REGION }}
+          ecr_repository_name: ${{ needs.ecr.outputs.ecr_repo_name }}
+          version: ${{ env.version }}
+          push-role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN }}
+          target: consumer
 
       - id: set_uri
         run: |

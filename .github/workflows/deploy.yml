@@ -17,6 +17,10 @@ on:
         required: true
         type: string
         description: Image to be deployed to ECS
+      app_consumer_image_uri:
+        required: true
+        type: string
+        description: Image to be deployed to ECS
       aws_otel_collector_image_uri:
         required: true
         type: string
@@ -37,6 +41,8 @@ permissions:
 
 env:
   AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
+  TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
+  TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
 
 jobs:
   setup:
@@ -94,6 +100,8 @@ jobs:
           ref: ${{ inputs.infra_version }}
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_image_uri: ${{ inputs.app_consumer_image_uri }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task_consumer
@@ -139,8 +147,6 @@ jobs:
         id: task
         env: 
           TF_VAR_image_uri: ${{ inputs.app_responder_image_uri }}
-          TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
-          TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task_responder
@@ -183,8 +189,7 @@ jobs:
         id: task
         env: 
           TF_VAR_image_uri: ${{ inputs.app_caller_image_uri }}
-          TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
-          TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
+
           TF_VAR_downstream_url: ${{ needs.svc-responder.outputs.invoke_url }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
