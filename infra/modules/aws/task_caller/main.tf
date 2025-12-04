@@ -19,6 +19,10 @@ module "task_caller" {
     {
       "name"  = "AWS_SQS_QUEUE_URL",
       "value" = "${data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_url}"
+    },
+    {
+      "name"  = "DOWNSTREAM_URL",
+      "value" = "${var.downstream_url}"
     }
   ]
   additional_runtime_policy_arns = [

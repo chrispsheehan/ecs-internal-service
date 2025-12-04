@@ -54,3 +54,6 @@ variable "xray_enabled" {
   type = bool
 }
 
+variable "downstream_url" {
+  type = string
+}
