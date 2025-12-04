@@ -17,7 +17,7 @@ module "task_responder" {
 
   additional_env_vars = var.additional_env_vars
 
-  root_path = "responder"
+  root_path    = "responder"
   service_name = "ecs-responder-svc"
   python_app   = "app.responder.app:app"
 }
