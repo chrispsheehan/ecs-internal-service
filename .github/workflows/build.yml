@@ -14,8 +14,8 @@ on:
         value: ${{ jobs.app-responder.outputs.image_uri }}
       app_caller_image_uri:
         value: ${{ jobs.app-responder.outputs.image_uri }}
-      app_consumer_image_uri:
-        value: ${{ jobs.app-consumer.outputs.image_uri }}
+      consumer_image_uri:
+        value: ${{ jobs.consumer.outputs.image_uri }}
       aws_otel_collector_image_uri: 
         value: ${{ jobs.aws-otel-collector.outputs.image_uri }}
       debug_image_uri: 
@@ -101,7 +101,7 @@ jobs:
         run: |
           echo "IMAGE_URI=${{ env.IMAGE_URI }}" >> $GITHUB_OUTPUT
 
-  app-consumer:
+  consumer:
     needs: ecr
     runs-on: ubuntu-latest
     outputs:

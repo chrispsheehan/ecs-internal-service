@@ -22,6 +22,6 @@ jobs:
       infra_version: ${{ github.sha }}
       app_responder_image_uri: ${{ needs.build.outputs.app_responder_image_uri }}
       app_caller_image_uri: ${{ needs.build.outputs.app_caller_image_uri }}
-      pp_consumer_image_uri: ${{ needs.build.outputs.app_consumer_image_uri }}
+      consumer_image_uri: ${{ needs.build.outputs.consumer_image_uri }}
       aws_otel_collector_image_uri: ${{ needs.build.outputs.aws_otel_collector_image_uri }}
       debug_image_uri: ${{ needs.build.outputs.debug_image_uri }}
