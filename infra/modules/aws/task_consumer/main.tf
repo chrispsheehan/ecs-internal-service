@@ -1,4 +1,4 @@
-module "task_responder" {
+module "task_consumer" {
   source = "../_shared/task"
 
   project_name   = var.project_name
@@ -17,20 +17,15 @@ module "task_responder" {
 
   additional_env_vars = [
     {
-      "name"  = "DOWNSTREAM_URL",
-      "value" = "${var.downstream_url}"
+      "name"  = "AWS_SQS_QUEUE_URL",
+      "value" = "${data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_url}"
     }
   ]
   additional_runtime_policy_arns = [
-    aws_iam_policy.s3_list_policy.arn
+    data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_read_policy_arn
   ]
 
-  root_path    = "responder"
-  service_name = "ecs-responder-svc"
-  command      = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "app.responder.app:app"]
-}
-
-resource "aws_iam_policy" "s3_list_policy" {
-  name   = "${module.task_responder.service_name}-s3-list-policy"
-  policy = data.aws_iam_policy_document.s3_list.json
+  root_path    = ""
+  service_name = "ecs-consumer"
+  command      = ["python", "-u", "consumer/app.py"]
 }
