@@ -82,7 +82,9 @@ jobs:
           tg_action: destroy
 
   task-consumer:
-    needs: svc-consumer
+    needs: 
+      - svc-consumer
+      - svc-caller
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
