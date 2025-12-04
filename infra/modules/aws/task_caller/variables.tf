@@ -1,8 +1,16 @@
-variable "project_name" {
+variable "state_bucket" {
+  type = string
+}
+
+variable "environment" {
   type = string
 }
 
 variable "aws_region" {
+  type = string
+}
+
+variable "project_name" {
   type = string
 }
 
@@ -46,10 +54,6 @@ variable "xray_enabled" {
   type = bool
 }
 
-variable "additional_env_vars" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
+variable "downstream_url" {
+  type = string
 }

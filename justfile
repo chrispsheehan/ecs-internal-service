@@ -42,7 +42,7 @@ get-task-id svc:
     aws ecs list-tasks \
         --region eu-west-2 \
         --cluster "ecs-internal-service-cluster" \
-        --service-name "ecs-internal-{{svc}}-svc" \
+        --service-name "{{svc}}" \
         --desired-status RUNNING \
         --query 'taskArns[-1]' --output text
 
@@ -53,7 +53,7 @@ local-connect svc:
         --region eu-west-2 \
         --cluster "ecs-internal-service-cluster" \
         --task "$TASK_ID" \
-        --container "ecs-internal-{{svc}}-svc-debug" \
+        --container "{{svc}}" \
         --interactive \
         --command "/bin/sh"
 

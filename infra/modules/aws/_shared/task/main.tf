@@ -57,19 +57,16 @@ resource "aws_iam_policy" "xray_put_policy" {
   policy = data.aws_iam_policy_document.xray_put.json
 }
 
-resource "aws_iam_policy" "s3_list_policy" {
-  name   = "${var.service_name}-s3-list-policy"
-  policy = data.aws_iam_policy_document.s3_list.json
-}
-
 resource "aws_iam_role_policy_attachment" "xray_put_policy_attachment" {
   role       = aws_iam_role.ecs_task_role.name
   policy_arn = aws_iam_policy.xray_put_policy.arn
 }
 
-resource "aws_iam_role_policy_attachment" "s3_list_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "task_runtime_additional_attachments" {
+  for_each = { for idx, arn in var.additional_runtime_policy_arns : idx => arn }
+
   role       = aws_iam_role.ecs_task_role.name
-  policy_arn = aws_iam_policy.s3_list_policy.arn
+  policy_arn = each.value
 }
 
 resource "aws_ecs_task_definition" "task" {

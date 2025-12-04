@@ -15,9 +15,21 @@ module "task_caller" {
   local_tunnel = var.local_tunnel
   xray_enabled = var.xray_enabled
 
-  additional_env_vars = var.additional_env_vars
+  additional_env_vars = [
+    {
+      "name"  = "AWS_SQS_QUEUE_URL",
+      "value" = "${data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_url}"
+    },
+    {
+      "name"  = "DOWNSTREAM_URL",
+      "value" = "${var.downstream_url}"
+    }
+  ]
+  additional_runtime_policy_arns = [
+    data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_write_policy_arn
+  ]
 
   root_path    = ""
   service_name = "ecs-caller-svc"
-  python_app   = "app.caller.app:app"
+  command      = ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:${var.container_port}", "app.caller.app:app"]
 }

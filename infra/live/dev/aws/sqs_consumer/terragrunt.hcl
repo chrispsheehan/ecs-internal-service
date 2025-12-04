@@ -3,5 +3,5 @@ include {
 }
 
 terraform {
-  source = "../../../../modules//aws//service_responder"
+  source = "../../../../modules//aws//sqs_consumer"
 }

@@ -1,7 +1,9 @@
+import json
 import os
 from datetime import datetime
 from typing import Dict, Any
 
+import boto3
 from fastapi import APIRouter, FastAPI, Request, HTTPException
 import httpx
 
@@ -16,6 +18,9 @@ from opentelemetry.trace import SpanKind
 # -------------------------
 # env
 # -------------------------
+QUEUE_URL  = os.environ['AWS_SQS_QUEUE_URL']
+AWS_REGION = os.environ['AWS_REGION']
+
 DOWNSTREAM_URL = os.getenv("DOWNSTREAM_URL", "http://downstream:8080")
 XRAY_ENDPOINT  = os.getenv("AWS_XRAY_ENDPOINT", "NOT_SET")
 SERVICE_NAME   = os.getenv("AWS_SERVICE_NAME", "caller-service")
@@ -24,6 +29,9 @@ ROOT_PATH      = os.getenv("ROOT_PATH", "")
 
 router = APIRouter(prefix=ROOT_PATH)
 app = FastAPI()
+sqs = boto3.client(
+    'sqs',
+    region_name=AWS_REGION)
 
 # -------------------------
 # otel (x-ray ids + otlp)
@@ -95,6 +103,34 @@ async def call_downstream_same_path(path: str) -> Dict[str, Any]:
         except Exception as exc:
             span.record_exception(exc)
             raise HTTPException(status_code=502, detail=f"downstream failed: {exc}")
+        
+async def send_to_sqs(message_body: Dict[str, Any]) -> Dict[str, Any]:
+    """Send message to SQS queue"""
+    with tracer.start_as_current_span(
+        "sqs.send_message",
+        kind=SpanKind.CLIENT,
+        attributes={
+            "messaging.system": "aws.sqs",
+            "messaging.operation": "send",
+            "messaging.destination.name": QUEUE_URL,
+        }
+    ) as span:
+        try:
+            response = sqs.send_message(
+                QueueUrl=QUEUE_URL,
+                MessageBody=json.dumps(message_body)
+            )
+            span.set_attribute("messaging.message_id", response['MessageId'])
+            span.set_attribute("messaging.message.conversation_id", response['MessageId'])
+            return {
+                "status": "success",
+                "message_id": response['MessageId'],
+                "message_deduplication_id": response.get('MD5OfMessageBody'),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        except Exception as exc:
+            span.record_exception(exc)
+            raise HTTPException(status_code=500, detail=f"SQS send failed: {exc}")
 
 # -------------------------
 # routes (same names as downstream)
@@ -129,5 +165,10 @@ async def requests_test():
 @router.get("/httpx-test")
 async def httpx_test():
     return await call_downstream_same_path("/httpx-test")
+
+@router.post("/send-to-sqs")
+async def send_to_sqs_route(payload: Dict[str, Any]):
+    """Send message to SQS queue"""
+    return await send_to_sqs(payload)
 
 app.include_router(router)

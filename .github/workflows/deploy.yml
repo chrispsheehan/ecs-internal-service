@@ -17,6 +17,10 @@ on:
         required: true
         type: string
         description: Image to be deployed to ECS
+      consumer_image_uri:
+        required: true
+        type: string
+        description: Image to be deployed to ECS
       aws_otel_collector_image_uri:
         required: true
         type: string
@@ -37,6 +41,8 @@ permissions:
 
 env:
   AWS_OIDC_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ecs-internal-service-${{ inputs.environment }}-github-oidc-role
+  TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
+  TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
 
 jobs:
   setup:
@@ -66,10 +72,53 @@ jobs:
           ref: ${{ inputs.infra_version }}
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-        id: cluster
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
+
+  sqs-consumer:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/sqs_consumer
+
+  task-consumer:
+    needs:
+      - sqs-consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_image_uri: ${{ inputs.consumer_image_uri }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task_consumer
+
+  svc-consumer:
+    needs:
+      - task-consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
+
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/service_consumer
 
   network:
     needs:
@@ -98,13 +147,11 @@ jobs:
         id: task
         env: 
           TF_VAR_image_uri: ${{ inputs.app_responder_image_uri }}
-          TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
-          TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task_responder
 
-  ecs-responder-svc:
+  svc-responder:
     needs:
       - cluster
       - network
@@ -118,7 +165,7 @@ jobs:
           ref: ${{ inputs.infra_version }}
 
       - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-        id: ecs-responder-svc
+        id: svc-responder
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/service_responder
@@ -126,12 +173,12 @@ jobs:
       - name: get vars
         id: get-vars
         env:
-          TG_OUTPUTS: ${{ steps.ecs-responder-svc.outputs.tg_outputs  }}
+          TG_OUTPUTS: ${{ steps.svc-responder.outputs.tg_outputs  }}
         run: |
           echo "invoke_url=$(echo $TG_OUTPUTS | jq -r '.invoke_url.value')" >> $GITHUB_OUTPUT
 
   task-caller:
-    needs: ecs-responder-svc
+    needs: svc-responder
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -142,14 +189,12 @@ jobs:
         id: task
         env: 
           TF_VAR_image_uri: ${{ inputs.app_caller_image_uri }}
-          TF_VAR_aws_otel_collector_image_uri: ${{ inputs.aws_otel_collector_image_uri }}
-          TF_VAR_debug_image_uri: ${{ inputs.debug_image_uri }}
+          TF_VAR_downstream_url: ${{ needs.svc-responder.outputs.invoke_url }}
         with:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/task_caller
-          override_tg_vars: '{"additional_env_vars": [{"name": "DOWNSTREAM_URL", "value": "${{ needs.ecs-responder-svc.outputs.invoke_url }}"}]}'
 
-  ecs-caller-svc:
+  svc-caller:
     needs:
       - cluster
       - network

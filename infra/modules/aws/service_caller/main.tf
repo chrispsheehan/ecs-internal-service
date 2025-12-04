@@ -8,6 +8,9 @@ module "service_caller" {
   environment    = var.environment
   container_port = var.container_port
 
+  xray_enabled = var.xray_enabled
+  local_tunnel = var.local_tunnel
+
   connection_type     = "vpc_link"
   task_definition_arn = data.terraform_remote_state.task_caller.outputs.task_definition_arn
   root_path           = data.terraform_remote_state.task_caller.outputs.root_path

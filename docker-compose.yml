@@ -63,6 +63,26 @@ services:
     networks:
       - tracing
 
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: consumer
+    container_name: consumer
+    env_file:
+      - .env
+    environment:
+      AWS_XRAY_ENDPOINT: http://otel-collector:4317
+      AWS_SERVICE_NAME: local-consumer
+      IMAGE: docker-compose-app-consumer
+    volumes:
+      - ./src:/usr/app/app
+    command: python -u consumer/app.py
+    depends_on:
+      - otel-collector
+    networks:
+      - tracing
+
   debug:
     build:
       context: .

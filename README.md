@@ -23,9 +23,23 @@ can hit the app with `curl http://localhos6:3000/health`
 
 needs `brew install --cask session-manager-plugin`
 
-`just local-connect caller`
+`just local-connect ecs-caller-svc`
 
 
 
-debug
+debug otel
+```sh
 curl -X POST https://xray.eu-west-2.amazonaws.com/ -H "Content-Type: application/x-amz-json-1.1" -H "X-Amz-Target: AWSXRay_20160125.PutTraceSegments" -d '{"TraceSegmentDocuments":["{\"id\":\"1-5f84c7a8-869cd2224b6d8afd7a5d278f\",\"name\":\"my-service\",\"start_time\":1602611816.123,\"end_time\":1602611816.456}"]}' --max-time 3
+```
+
+
+send sqs
+```sh
+curl -X POST http://localhost:8000/send-to-sqs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event": "test_event",
+    "user_id": "12345",
+    "data": "hello world"
+  }'
+```

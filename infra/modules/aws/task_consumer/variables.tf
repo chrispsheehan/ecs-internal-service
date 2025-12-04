@@ -1,12 +1,16 @@
-variable "project_name" {
+variable "state_bucket" {
   type = string
 }
 
-variable "service_name" {
+variable "environment" {
   type = string
 }
 
 variable "aws_region" {
+  type = string
+}
+
+variable "project_name" {
   type = string
 }
 
@@ -48,26 +52,4 @@ variable "local_tunnel" {
 
 variable "xray_enabled" {
   type = bool
-}
-
-variable "additional_env_vars" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
-
-variable "command" {
-  type = list(string)
-}
-
-variable "root_path" {
-  type = string
-}
-
-variable "additional_runtime_policy_arns" {
-  description = "List of IAM runtime policy ARNs to attach to the role"
-  type        = list(string)
-  default     = []
 }
