@@ -23,7 +23,7 @@ can hit the app with `curl http://localhos6:3000/health`
 
 needs `brew install --cask session-manager-plugin`
 
-`just local-connect caller`
+`just local-connect ecs-caller-svc`
 
 
 
