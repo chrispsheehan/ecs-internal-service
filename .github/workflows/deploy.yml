@@ -120,20 +120,20 @@ jobs:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/service_consumer
 
-  # network:
-  #   needs:
-  #     - setup
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  network:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       id: cluster
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/network
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: cluster
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/network
 
   # task-responder:
   #   needs: setup
