@@ -6,8 +6,9 @@ resource "aws_appautoscaling_target" "ecs" {
   service_namespace  = "ecs"
 }
 
-resource "aws_appautoscaling_policy" "scale_in" {
-  name               = "${var.project_name}-${var.task_name}-scale-in"
+resource "aws_appautoscaling_policy" "cpu_scale_in" {
+  count             = local.enable_cpu_scaling ? 1 : 0
+  name               = "${var.project_name}-${var.task_name}-cpu-scale-in"
   policy_type        = "StepScaling"
   resource_id        = aws_appautoscaling_target.ecs.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
@@ -17,17 +18,18 @@ resource "aws_appautoscaling_policy" "scale_in" {
     adjustment_type = "ChangeInCapacity"
 
     step_adjustment {
-      scaling_adjustment          = var.scaling_in_adjustment
+      scaling_adjustment          = var.scaling_strategy.cpu.scale_in_adjustment
       metric_interval_upper_bound = 0
     }
 
-    cooldown                = var.auto_scale_cool_down_period_in
+    cooldown                = var.scaling_strategy.cpu.cooldown_in
     metric_aggregation_type = "Average"
   }
 }
 
-resource "aws_appautoscaling_policy" "scale_out" {
-  name               = "${var.project_name}-${var.task_name}-scale-out"
+resource "aws_appautoscaling_policy" "cpu_scale_out" {
+  count             = local.enable_cpu_scaling ? 1 : 0
+  name               = "${var.project_name}-${var.task_name}-cpu-scale-out"
   policy_type        = "StepScaling"
   resource_id        = aws_appautoscaling_target.ecs.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
@@ -37,43 +39,128 @@ resource "aws_appautoscaling_policy" "scale_out" {
     adjustment_type = "ChangeInCapacity"
 
     step_adjustment {
-      scaling_adjustment          = var.scaling_out_adjustment
+      scaling_adjustment          = var.scaling_strategy.cpu.scale_out_adjustment
       metric_interval_lower_bound = 0
     }
 
-    cooldown                = var.auto_scale_cool_down_period_out
+    cooldown                = var.scaling_strategy.cpu.cooldown_out
     metric_aggregation_type = "Average"
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "scale_in_alarm" {
-  alarm_name          = "${var.project_name}-${var.task_name}-scale-in-alarm"
+resource "aws_cloudwatch_metric_alarm" "cpu_scale_in_alarm" {
+  count              = local.enable_cpu_scaling ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.task_name}-cpu-scale-in-alarm"
   comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = local.evaluation_periods_in
+  evaluation_periods  = local.evaluation_periods_cpu_in
   metric_name         = "CPUUtilization"
   namespace           = "AWS/ECS"
-  period              = var.auto_scale_cool_down_period_in
+  period              = var.scaling_strategy.cpu.cooldown_in
   statistic           = "Average"
-  threshold           = var.cpu_scale_in_threshold
-  alarm_actions       = [aws_appautoscaling_policy.scale_in.arn]
+  threshold           = var.scaling_strategy.cpu.scale_in_threshold
+  alarm_actions       = [aws_appautoscaling_policy.cpu_scale_in[0].arn]
+
   dimensions = {
     ClusterName = data.aws_ecs_cluster.cluster.cluster_name
     ServiceName = var.ecs_name
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "scale_out_alarm" {
-  alarm_name          = "${var.project_name}-${var.task_name}-scale-out-alarm"
+resource "aws_cloudwatch_metric_alarm" "cpu_scale_out_alarm" {
+  count              = local.enable_cpu_scaling ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.task_name}-cpu-scale-out-alarm"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = local.evaluation_periods_out
+  evaluation_periods  = local.evaluation_periods_cpu_out
   metric_name         = "CPUUtilization"
   namespace           = "AWS/ECS"
-  period              = var.auto_scale_cool_down_period_out
+  period              = var.scaling_strategy.cpu.cooldown_out
   statistic           = "Average"
-  threshold           = var.cpu_scale_out_threshold
-  alarm_actions       = [aws_appautoscaling_policy.scale_out.arn]
+  threshold           = var.scaling_strategy.cpu.scale_out_threshold
+  alarm_actions       = [aws_appautoscaling_policy.cpu_scale_out[0].arn]
+
   dimensions = {
     ClusterName = data.aws_ecs_cluster.cluster.cluster_name
     ServiceName = var.ecs_name
   }
 }
+
+resource "aws_appautoscaling_policy" "sqs_scale_in" {
+  count             = local.enable_sqs_scaling ? 1 : 0
+  name               = "${var.project_name}-${var.task_name}-sqs-scale-in"
+  policy_type        = "StepScaling"
+  resource_id        = aws_appautoscaling_target.ecs.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+
+  step_scaling_policy_configuration {
+    adjustment_type = "ChangeInCapacity"
+
+    step_adjustment {
+      scaling_adjustment          = var.scaling_strategy.sqs.scale_in_adjustment
+      metric_interval_upper_bound = 0
+    }
+
+    cooldown                = var.scaling_strategy.sqs.cooldown_in
+    metric_aggregation_type = "Average"
+  }
+}
+
+resource "aws_appautoscaling_policy" "sqs_scale_out" {
+  count             = local.enable_sqs_scaling ? 1 : 0
+  name               = "${var.project_name}-${var.task_name}-sqs-scale-out"
+  policy_type        = "StepScaling"
+  resource_id        = aws_appautoscaling_target.ecs.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+
+  step_scaling_policy_configuration {
+    adjustment_type = "ChangeInCapacity"
+
+    step_adjustment {
+      scaling_adjustment          = var.scaling_strategy.sqs.scale_out_adjustment
+      metric_interval_lower_bound = 0
+    }
+
+    cooldown                = var.scaling_strategy.sqs.cooldown_out
+    metric_aggregation_type = "Average"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "sqs_scale_in_alarm" {
+  count              = local.enable_sqs_scaling ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.task_name}-sqs-scale-in-alarm"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = local.evaluation_periods_sqs_in
+  metric_name         = "ApproximateNumberOfMessagesVisible"
+  namespace           = "AWS/SQS"
+  period              = var.scaling_strategy.sqs.cooldown_in
+  statistic           = "Average"
+  threshold           = var.scaling_strategy.sqs.scale_in_threshold
+  alarm_actions       = [aws_appautoscaling_policy.sqs_scale_in[0].arn]
+
+  dimensions = {
+    QueueName = var.scaling_strategy.sqs.queue_name
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "sqs_scale_out_alarm" {
+  count              = local.enable_sqs_scaling ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.task_name}-sqs-scale-out-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = local.evaluation_periods_sqs_out
+  metric_name         = "ApproximateNumberOfMessagesVisible"
+  namespace           = "AWS/SQS"
+  period              = var.scaling_strategy.sqs.cooldown_out
+  statistic           = "Average"
+  threshold           = var.scaling_strategy.sqs.scale_out_threshold
+  alarm_actions       = [aws_appautoscaling_policy.sqs_scale_out[0].arn]
+
+  dimensions = {
+    QueueName = var.scaling_strategy.sqs.queue_name
+  }
+}
+
