@@ -12,7 +12,8 @@ locals {
     "elasticloadbalancing:*",
     "apigateway:*",
     "sqs:*",
-    "autoscaling:*"
+    "autoscaling:*",
+    "application-autoscaling:*"
   ]
   container_port = 3000
 }
