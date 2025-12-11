@@ -62,36 +62,32 @@ variable "additional_security_group_ids" {
   default     = []
 }
 
+variable "desired_task_count" {
+  type = number
+}
+
 variable "scaling_strategy" {
   type = object({
-    mode = string                        # "cpu", "sqs", "cpu_and_sqs"
-
-    cpu = object({
-      scale_out_threshold = number       # CPU >= this → scale out
-      scale_in_threshold  = number       # CPU <= this → scale in
+    max_scaled_task_count = optional(number)
+    cpu = optional(object({
+      scale_out_threshold  = number
+      scale_in_threshold   = number
       scale_out_adjustment = number
       scale_in_adjustment  = number
-      cooldown_out = number
-      cooldown_in  = number
-    })
-
-    sqs = object({
-      scale_out_threshold = number       # queue length >= this → scale out
-      scale_in_threshold  = number       # queue length <= this → scale in
+      cooldown_out         = number
+      cooldown_in          = number
+    }))
+    sqs = optional(object({
+      scale_out_threshold  = number
+      scale_in_threshold   = number
       scale_out_adjustment = number
       scale_in_adjustment  = number
-      cooldown_out = number
-      cooldown_in  = number
-      queue_name   = string
-    })
+      cooldown_out         = number
+      cooldown_in          = number
+      queue_name           = string
+    }))
   })
 
-  default = {
-    mode = "off"
-  }
-
-  validation {
-    condition = contains(["off", "cpu", "sqs", "cpu_and_sqs"], var.scaling_strategy.mode)
-    error_message = "scaling_strategy.mode must be one of: cpu, sqs, cpu_and_sqs."
-  }
+  # {} = "off" by convention
+  default = {}
 }

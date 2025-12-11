@@ -15,14 +15,15 @@ module "service_consumer" {
   task_definition_arn = data.terraform_remote_state.task_consumer.outputs.task_definition_arn
   service_name        = data.terraform_remote_state.task_consumer.outputs.service_name
 
+  desired_task_count = 1
   scaling_strategy = {
     cpu = {
-      scale_out_threshold = 70
-      scale_in_threshold  = 30
+      scale_out_threshold  = 70
+      scale_in_threshold   = 30
       scale_out_adjustment = 1
       scale_in_adjustment  = 1
-      cooldown_out = 60
-      cooldown_in  = 60
+      cooldown_out         = 60
+      cooldown_in          = 60
     }
   }
 }
