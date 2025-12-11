@@ -15,4 +15,6 @@ module "service_caller" {
   task_definition_arn = data.terraform_remote_state.task_caller.outputs.task_definition_arn
   root_path           = data.terraform_remote_state.task_caller.outputs.root_path
   service_name        = data.terraform_remote_state.task_caller.outputs.service_name
+
+  desired_task_count = 1
 }
