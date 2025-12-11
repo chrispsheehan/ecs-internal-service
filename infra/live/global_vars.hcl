@@ -11,7 +11,8 @@ locals {
     "cloudwatch:*",
     "elasticloadbalancing:*",
     "apigateway:*",
-    "sqs:*"
+    "sqs:*",
+    "autoscaling:*"
   ]
   container_port = 3000
 }
