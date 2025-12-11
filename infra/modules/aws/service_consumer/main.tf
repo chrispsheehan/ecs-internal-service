@@ -17,6 +17,7 @@ module "service_consumer" {
 
   desired_task_count = 1
   scaling_strategy = {
+    max_scaled_task_count = 2
     cpu = {
       scale_out_threshold  = 70
       scale_in_threshold   = 30
