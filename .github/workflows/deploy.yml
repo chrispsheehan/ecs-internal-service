@@ -108,6 +108,7 @@ jobs:
 
   svc-consumer:
     needs:
+      - network
       - task-consumer
     runs-on: ubuntu-latest
     steps:
