@@ -1,3 +1,7 @@
+output "sqs_queue_name" {
+  value = module.sqs_consumer.sqs_queue_name
+}
+
 output "sqs_queue_url" {
   value = module.sqs_consumer.sqs_queue_url
 }

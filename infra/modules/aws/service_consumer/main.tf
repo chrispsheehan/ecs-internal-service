@@ -17,14 +17,24 @@ module "service_consumer" {
 
   desired_task_count = 1
   scaling_strategy = {
-    max_scaled_task_count = 2
+    max_scaled_task_count = 3
     cpu = {
-      scale_out_threshold  = 70
-      scale_in_threshold   = 30
-      scale_out_adjustment = 1
-      scale_in_adjustment  = 1
-      cooldown_out         = 60
-      cooldown_in          = 60
+      scale_out_threshold  = 60  # Scale at 60% avg CPU
+      scale_in_threshold   = 20  # Scale in below 20% avg  
+      scale_out_adjustment = 2   # Add 2 tasks
+      scale_in_adjustment  = 1   # Remove 1 task
+      cooldown_out         = 180 # 3min cooldown
+      cooldown_in          = 300 # 5min cooldown (anti-flap)
+    }
+
+    sqs = {
+      scale_out_threshold  = 10  # Start scaling at 10 msgs avg
+      scale_in_threshold   = 2   # Scale in below 2 msgs avg  
+      scale_out_adjustment = 2   # Add 2 tasks at once
+      scale_in_adjustment  = 1   # Remove 1 task
+      cooldown_out         = 120 # 2min cooldown (more stable)
+      cooldown_in          = 300 # 5min cooldown (prevent flapping)
+      queue_name           = data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_name
     }
   }
 }

@@ -37,8 +37,8 @@ module "ecs" {
 module "auto_scaling" {
   source = "./auto_scaling"
 
-  cluster_name = data.terraform_remote_state.cluster.outputs.cluster_name
-  service_name = var.service_name
+  cluster_name       = data.terraform_remote_state.cluster.outputs.cluster_name
+  service_name       = var.service_name
   initial_task_count = var.desired_task_count
   scaling_strategy   = var.scaling_strategy
 }
