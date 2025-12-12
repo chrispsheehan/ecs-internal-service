@@ -34,4 +34,12 @@ variable "scaling_strategy" {
 
   # {} = "off" by convention
   default = {}
+
+  validation {
+    condition = !(
+      try(var.scaling_strategy.cpu != null, false) &&
+      try(var.scaling_strategy.sqs != null, false)
+    )
+    error_message = "Only one of scaling_strategy.cpu or scaling_strategy.sqs may be set at a time to avoid conflicting autoscalers."
+  }
 }
