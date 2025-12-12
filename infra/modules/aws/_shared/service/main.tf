@@ -26,9 +26,19 @@ module "ecs" {
   private_subnet_ids  = data.aws_subnets.private.ids
   container_port      = var.container_port
   task_definition_arn = var.task_definition_arn
+  desired_task_count  = var.desired_task_count
 
   xray_enabled = var.xray_enabled
   local_tunnel = var.local_tunnel
 
   load_balancers = local.load_balancers
+}
+
+module "auto_scaling" {
+  source = "./auto_scaling"
+
+  cluster_name       = data.terraform_remote_state.cluster.outputs.cluster_name
+  service_name       = var.service_name
+  initial_task_count = var.desired_task_count
+  scaling_strategy   = var.scaling_strategy
 }

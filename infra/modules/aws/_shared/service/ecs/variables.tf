@@ -7,8 +7,7 @@ variable "service_name" {
 }
 
 variable "desired_task_count" {
-  type    = number
-  default = 1
+  type = number
 }
 
 variable "load_balancers" {

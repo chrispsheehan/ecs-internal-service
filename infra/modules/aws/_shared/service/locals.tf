@@ -8,6 +8,6 @@ locals {
     container_port   = var.container_port
   }] : []
 
-  base_url   = var.connection_type == "internal_dns" ? data.terraform_remote_state.network.outputs.internal_invoke_url : data.terraform_remote_state.network.outputs.public_invoke_url
+  base_url   = var.connection_type == "internal" ? null : (var.connection_type == "internal_dns" ? data.terraform_remote_state.network.outputs.internal_invoke_url : data.terraform_remote_state.network.outputs.public_invoke_url)
   invoke_url = var.root_path == "" ? local.base_url : "${local.base_url}/${var.root_path}"
 }
