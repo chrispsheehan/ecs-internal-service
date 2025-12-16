@@ -31,9 +31,9 @@ locals {
   ) : null
 
   evaluation_periods_alb_out = local.enable_alb_scaling ? (
-    var.scaling_strategy.sqs.cooldown_out <= 60
+    var.scaling_strategy.alb.cooldown_out <= 60
     ? 1
-    : floor(var.scaling_strategy.sqs.cooldown_out / 60)
+    : floor(var.scaling_strategy.alb.cooldown_out / 60)
   ) : null
 
   evaluation_periods_alb_in = local.enable_alb_scaling ? (
