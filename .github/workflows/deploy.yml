@@ -76,50 +76,50 @@ jobs:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/cluster
 
-  # sqs-consumer:
-  #   needs:
-  #     - setup
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  sqs-consumer:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/sqs_consumer
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/sqs_consumer
 
-  # task-consumer:
-  #   needs:
-  #     - sqs-consumer
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  task-consumer:
+    needs:
+      - sqs-consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       env: 
-  #         TF_VAR_image_uri: ${{ inputs.consumer_image_uri }}
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/task_consumer
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        env: 
+          TF_VAR_image_uri: ${{ inputs.consumer_image_uri }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task_consumer
 
-  # svc-consumer:
-  #   needs:
-  #     - network
-  #     - task-consumer
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  svc-consumer:
+    needs:
+      - network
+      - task-consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/service_consumer
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/service_consumer
 
   network:
     needs:
@@ -136,50 +136,50 @@ jobs:
           aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
           tg_directory: infra/live/${{ inputs.environment }}/aws/network
 
-  # task-responder:
-  #   needs: setup
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  task-responder:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       id: task
-  #       env: 
-  #         TF_VAR_image_uri: ${{ inputs.app_responder_image_uri }}
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/task_responder
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: task
+        env: 
+          TF_VAR_image_uri: ${{ inputs.app_responder_image_uri }}
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/task_responder
 
-  # svc-responder:
-  #   needs:
-  #     - cluster
-  #     - network
-  #     - task-responder
-  #   outputs:
-  #     invoke_url: ${{ steps.get-vars.outputs.invoke_url }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ inputs.infra_version }}
+  svc-responder:
+    needs:
+      - cluster
+      - network
+      - task-responder
+    outputs:
+      invoke_url: ${{ steps.get-vars.outputs.invoke_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.infra_version }}
 
-  #     - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
-  #       id: svc-responder
-  #       with:
-  #         aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
-  #         tg_directory: infra/live/${{ inputs.environment }}/aws/service_responder
+      - uses: chrispsheehan/terragrunt-aws-oidc-action@0.4.0
+        id: svc-responder
+        with:
+          aws_oidc_role_arn: ${{ env.AWS_OIDC_ROLE_ARN }}
+          tg_directory: infra/live/${{ inputs.environment }}/aws/service_responder
 
-  #     - name: get vars
-  #       id: get-vars
-  #       env:
-  #         TG_OUTPUTS: ${{ steps.svc-responder.outputs.tg_outputs  }}
-  #       run: |
-  #         echo "invoke_url=$(echo $TG_OUTPUTS | jq -r '.invoke_url.value')" >> $GITHUB_OUTPUT
+      - name: get vars
+        id: get-vars
+        env:
+          TG_OUTPUTS: ${{ steps.svc-responder.outputs.tg_outputs  }}
+        run: |
+          echo "invoke_url=$(echo $TG_OUTPUTS | jq -r '.invoke_url.value')" >> $GITHUB_OUTPUT
 
   task-caller:
-    # needs: svc-responder
+    needs: svc-responder
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
