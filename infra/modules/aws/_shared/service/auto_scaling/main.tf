@@ -166,10 +166,6 @@ resource "aws_cloudwatch_metric_alarm" "sqs_scale_out_alarm" {
   }
 }
 
-locals {
-  enable_alb_scaling = true
-}
-
 resource "aws_appautoscaling_policy" "alb_req_per_target" {
   count              = local.enable_alb_scaling ? 1 : 0
   name               = "${var.service_name}-alb-req-per-target"
