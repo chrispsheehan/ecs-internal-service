@@ -86,6 +86,11 @@ variable "scaling_strategy" {
       cooldown_in          = number
       queue_name           = string
     }))
+    alb = optional(object({
+      target_requests_per_task = number
+      cooldown_in              = number
+      cooldown_out             = number
+    }))
   })
 
   # {} = "off" by convention

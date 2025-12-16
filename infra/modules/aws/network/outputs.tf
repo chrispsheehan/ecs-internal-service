@@ -10,6 +10,14 @@ output "load_balancer_arn" {
   value = aws_lb.internal.arn
 }
 
+output "load_balancer_arn_suffix" {
+  value = aws_lb.internal.arn_suffix
+}
+
+output "target_group_arn_suffix" {
+  value = aws_lb_target_group.default_target_group.arn_suffix
+}
+
 output "public_invoke_url" {
   value = trimsuffix(aws_apigatewayv2_stage.default_stage.invoke_url, "/")
 }

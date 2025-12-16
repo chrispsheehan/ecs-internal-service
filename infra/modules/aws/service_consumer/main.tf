@@ -23,7 +23,7 @@ module "service_consumer" {
       scale_in_threshold   = 2   # Scale in below 2 msgs avg  
       scale_out_adjustment = 2   # Add 2 tasks at once
       scale_in_adjustment  = 1   # Remove 1 task
-      cooldown_out         = 60 # 1min cooldown (more stable)
+      cooldown_out         = 60  # 1min cooldown (more stable)
       cooldown_in          = 300 # 5min cooldown (prevent flapping)
       queue_name           = data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_name
     }

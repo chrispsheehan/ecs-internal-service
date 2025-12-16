@@ -41,4 +41,7 @@ module "auto_scaling" {
   service_name       = var.service_name
   initial_task_count = var.desired_task_count
   scaling_strategy   = var.scaling_strategy
+
+  load_balancer_arn_suffix = data.terraform_remote_state.network.outputs.load_balancer_arn_suffix
+  target_group_arn_suffix  = data.terraform_remote_state.network.outputs.target_group_arn_suffix
 }

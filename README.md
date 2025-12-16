@@ -62,6 +62,12 @@ Served by the `connection_type` variable.
 - `internal_dns`: only accessible via internal dns http
 - `vpc_link`: accessible publicly via vpc link
 
+##### xray
+
+We can see traffic at an inter-service level in xray, as per below.
+
+![Xray diagram](./docs/xray_example.png)
+
 #### auto-scaling
 
 Served by the `scaling_strategy` variable.
@@ -102,6 +108,18 @@ scaling_strategy = {}
       cooldown_in          = 300 # 5min cooldown (prevent flapping)
       queue_name           = data.terraform_remote_state.sqs_consumer.outputs.sqs_queue_name
     }
+  }
+```
+
+- `alb`: aws chooses how many tasks to add based on (average/minute) traffic. Max scaled tasks still respected.
+```hcl
+  scaling_strategy = {
+    max_scaled_task_count = 4
+    alb = optional(object({
+      target_requests_per_task = number
+      cooldown_in              = number
+      cooldown_out             = number
+    }))
   }
 ```
 

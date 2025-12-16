@@ -17,4 +17,13 @@ module "service_caller" {
   service_name        = data.terraform_remote_state.task_caller.outputs.service_name
 
   desired_task_count = 1
+
+  scaling_strategy = {
+    max_scaled_task_count = 2
+    alb = {
+      target_requests_per_task = 1 # to test the trigger
+      cooldown_in              = 60
+      cooldown_out             = 60
+    }
+  }
 }
