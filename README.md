@@ -62,6 +62,12 @@ Served by the `connection_type` variable.
 - `internal_dns`: only accessible via internal dns http
 - `vpc_link`: accessible publicly via vpc link
 
+##### xray
+
+We can see traffic at an inter-service level in xray, as per below.
+
+![Xray diagram](./docs/xray_example.png)
+
 #### auto-scaling
 
 Served by the `scaling_strategy` variable.
