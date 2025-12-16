@@ -166,3 +166,29 @@ resource "aws_cloudwatch_metric_alarm" "sqs_scale_out_alarm" {
   }
 }
 
+locals {
+  enable_alb_scaling = true
+}
+
+resource "aws_appautoscaling_policy" "alb_req_per_target" {
+  count              = local.enable_alb_scaling ? 1 : 0
+  name               = "${var.service_name}-alb-req-per-target"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ALBRequestCountPerTarget"
+
+      # ALB ARN suffix: app/<name>/<id>
+      # TG ARN suffix: targetgroup/<name>/<id>
+      resource_label = "${var.load_balancer_arn_suffix}/${var.target_group_arn_suffix}"
+    }
+
+    target_value       = var.scaling_strategy.alb.target_requests_per_task
+    scale_in_cooldown  = local.evaluation_periods_alb_in
+    scale_out_cooldown = local.evaluation_periods_alb_out
+  }
+}

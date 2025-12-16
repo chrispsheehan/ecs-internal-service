@@ -105,6 +105,18 @@ scaling_strategy = {}
   }
 ```
 
+- `alb`: aws chooses how many tasks to add based on (average/minute) traffic. Max scaled tasks still respected.
+```hcl
+  scaling_strategy = {
+    max_scaled_task_count = 4
+    alb = optional(object({
+      target_requests_per_task = number
+      cooldown_in              = number
+      cooldown_out             = number
+    }))
+  }
+```
+
 ## debugging
 
 - debug otel from within container
